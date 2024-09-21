@@ -53,6 +53,7 @@ class ImageShareApp:
         back_icon_path = os.path.join(os.path.dirname(__file__), "drawables", "icon_back.png")
         self.back_icon_image = ImageTk.PhotoImage(file=back_icon_path)
         self.create_main_window()
+
     def resource_path(self, relative_path):
         """ Get the absolute path to the resource, works for dev and for PyInstaller """
         try:
