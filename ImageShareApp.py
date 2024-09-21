@@ -9,11 +9,12 @@ class ImageShareApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Image Share App")
-        self.root.geometry("400x300")
+        self.root.geometry("450x350")
         self.mode = None
         self.image_path = None
         self.window_stack = []
-
+        self.receiver_running = False
+        self.receiver_thread = None
         self.create_main_window()
 
     def create_main_window(self):
@@ -35,7 +36,9 @@ class ImageShareApp:
         self.image_label = tk.Label(self.root, text="The image sent by the sender will be here", font=("Arial", 12), width=40, height=10, relief="solid")
         self.image_label.pack(pady=10)
         tk.Button(self.root, text="Back", command=self.go_back).pack(pady=10)
-        threading.Thread(target=self.receive_file, daemon=True).start()
+        self.receiver_running = True
+        self.receiver_thread = threading.Thread(target=self.receive_file, daemon=True)
+        self.receiver_thread.start()
 
     def clear_window(self):
         # Store the current state of the window
@@ -47,6 +50,7 @@ class ImageShareApp:
         self.window_stack.append(state)
 
     def go_back(self):
+        self.receiver_running = False
         if self.window_stack:
             state = self.window_stack.pop()
             self.clear_window()  # Clear the current window before restoring the previous state
@@ -76,6 +80,9 @@ class ImageShareApp:
             return
 
         img = Image.open(self.image_path)
+        # Convert image to RGB if it has an alpha channel
+        if img.mode == 'RGBA':
+            img = img.convert('RGB')
         # Save the image with compression
         compressed_image_path = "compressed_image.jpg"
         img.save(compressed_image_path, "JPEG", quality=30)
@@ -95,22 +102,23 @@ class ImageShareApp:
         port = 5001
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.bind((host, port))
             s.listen(1)
-            conn, addr = s.accept()
-            with conn:
-                data = conn.recv(1024)
-                with open("received_image.jpg", 'wb') as f:
-                    while data:
-                        f.write(data)
-                        data = conn.recv(1024)
-                self.display_image("received_image.jpg")
+            while self.receiver_running:
+                conn, addr = s.accept()
+                with conn:
+                    data = conn.recv(1024)
+                    with open("received_image.jpg", 'wb') as f:
+                        while data:
+                            f.write(data)
+                            data = conn.recv(1024)
+                    self.display_image("received_image.jpg")
 
     def display_image(self, image_path):
         img = Image.open(image_path)
-        img = img.resize((200, 200), Image.ANTIALIAS)
         img = ImageTk.PhotoImage(img)
-        self.image_label.config(image=img, text="")
+        self.image_label.config(image=img, text="", width=img.width(), height=img.height())
         self.image_label.image = img
 
 if __name__ == "__main__":
