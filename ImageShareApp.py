@@ -41,7 +41,8 @@ class ImageShareApp:
         self.root.iconphoto(False, icon_image)
         # Set the taskbar icon
         self.set_taskbar_icon(icon_path)
-
+        
+        self.chunk_size = 2048
         self.mode = None
         self.image_path = None
         self.window_stack = []
@@ -159,63 +160,66 @@ class ImageShareApp:
                     elif widget.cget('text') == 'Back':
                         widget.config(command=self.go_back)
 
+
     def select_file(self):
         self.image_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg")])
         if self.image_path:
             messagebox.showinfo("Selected File", f"Selected: {os.path.basename(self.image_path)}")
+
 
     def send_file(self):
         if not self.image_path:
             messagebox.showwarning("No File Selected", "Please select a file first.")
             return
 
-        img = Image.open(self.image_path)
-        if img.mode == 'RGBA':
-            img = img.convert('RGB')
-        compressed_image_path = "compressed_image.jpg"
-        img.save(compressed_image_path, "JPEG", quality=50)
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.connect(("localhost", 5001))
+        
+        
+        
 
-        port = 5001
-        broadcast_ip = '<broadcast>'
-        chunk_size = 4096  # Define the chunk size
-        end_of_transmission = b'END_OF_TRANSMISSION'
+        file = open(self.image_path, mode="rb")
+        data = file.read(self.chunk_size)
 
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-                s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-                with open(compressed_image_path, 'rb') as f:
-                    while True:
-                        chunk = f.read(chunk_size)
-                        if not chunk:
-                            break
-                        s.sendto(chunk, (broadcast_ip, port))
-                s.sendto(end_of_transmission, (broadcast_ip, port))  # Send end-of-transmission message
-                messagebox.showinfo("Success", "File sent successfully.")
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to send file: {e}")
+        while data:
+            client.send(data)
+            data = file.read(self.chunk_size)
+        
+        client.send(data)    
+        file.close()
+        self.image_path = None
+
+        client.close()
 
     def receive_file(self):
-        port = 5001
-        received_data = bytearray()
-        end_of_transmission = b'END_OF_TRANSMISSION'
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.bind(("localhost", 5001))
+        server.listen()
 
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            s.bind(('', port))
-            while self.receiver_running:
-                chunk, addr = s.recvfrom(4096)
-                if chunk == end_of_transmission:
-                    break
-                received_data.extend(chunk)
-            with open("received_image.jpg", 'wb') as f:
-                f.write(received_data)
-            self.display_image("received_image.jpg")
+        client_socket, client_address = server.accept()
 
+        while True:
+            data = client_socket.recv(self.chunk_size)
+            if not data: continue 
+
+            file = open("input_image.jpg", mode="wb")
+            while data != b'':
+                file.write(data)
+                data = client_socket.recv(self.chunk_size)
+                print(data)
+        
+            file.close()
+            self.display_image("input_image.jpg")
+        
+        server.close()
+
+    
     def display_image(self, image_path):
         img = Image.open(image_path)
         img = ImageTk.PhotoImage(img)
         self.image_label.config(image=img, text="", width=img.width(), height=img.height())
         self.image_label.image = img
+
 
 
 if __name__ == "__main__":
