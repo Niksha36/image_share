@@ -8,6 +8,7 @@ import ctypes
 import pystray
 import sys
 
+print(socket.gethostname())
 
 def create_rounded_rectangle_image(width, height, radius, fill_color, text, text_color, font, border=None):
     image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
@@ -173,11 +174,8 @@ class ImageShareApp:
             return
 
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client.connect(("localhost", 5001))
+        client.connect(('LAPTOP-TECV6IFT', 5050))
         
-        
-        
-
         file = open(self.image_path, mode="rb")
         data = file.read(self.chunk_size)
 
@@ -193,7 +191,7 @@ class ImageShareApp:
 
     def receive_file(self):
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server.bind(("localhost", 5001))
+        server.bind(('', 5050))
         server.listen()
 
         client_socket, client_address = server.accept()
