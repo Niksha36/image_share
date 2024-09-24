@@ -195,20 +195,24 @@ class ImageShareApp:
 
     def receive_file(self):
         port = 5001
-        received_data = bytearray()
         end_of_transmission = b'END_OF_TRANSMISSION'
 
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.bind(('', port))
             while self.receiver_running:
-                chunk, addr = s.recvfrom(4096)
-                if chunk == end_of_transmission:
-                    break
-                received_data.extend(chunk)
-            with open("received_image.jpg", 'wb') as f:
-                f.write(received_data)
-            self.display_image("received_image.jpg")
+                received_data = bytearray()
+                while True:
+                    chunk, addr = s.recvfrom(4096)
+                    if chunk == end_of_transmission:
+                        break
+                    received_data.extend(chunk)
+                if received_data:
+                    with open("received_image.jpg", 'wb') as f:
+                        f.write(received_data)
+                    self.display_image("received_image.jpg")
+                else:
+                    print("No image data received.")
 
     def display_image(self, image_path):
         img = Image.open(image_path)
