@@ -1,14 +1,18 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
+
 from PIL import Image, ImageDraw, ImageTk, ImageFont
+
 import socket
 import os
 import threading
 import ctypes
-import pystray
 import sys
+import pystray
 
-print(socket.gethostname())
+from server import Server
+from client import Client
+
 
 def create_rounded_rectangle_image(width, height, radius, fill_color, text, text_color, font, border=None):
     image = Image.new("RGBA", (width, height), (0, 0, 0, 0))
@@ -42,22 +46,23 @@ class ImageShareApp:
         self.root.iconphoto(False, icon_image)
         # Set the taskbar icon
         self.set_taskbar_icon(icon_path)
-        
-        self.chunk_size = 2048
-        self.mode = None
-        self.image_path = None
+
         self.window_stack = []
-        self.receiver_running = False
-        self.receiver_thread = None
         self.font_path = self.resource_path('fonts/Roboto-Regular.ttf')
         self.font = ImageFont.truetype(self.font_path, 16)
+
         # Load the back arrow icon
         back_icon_path = os.path.join(os.path.dirname(__file__), "drawables", "icon_back.png")
         self.back_icon_image = ImageTk.PhotoImage(file=back_icon_path)
         self.create_main_window()
 
+        self.chunk_size = 8192
+        self.image_path = None
+        self.count_images = 0
+        self.client_name_files = "input_image"
+
+
     def resource_path(self, relative_path):
-        """ Get the absolute path to the resource, works for dev and for PyInstaller """
         try:
             # PyInstaller creates a temp folder and stores path in _MEIPASS
             base_path = sys._MEIPASS
@@ -66,20 +71,21 @@ class ImageShareApp:
 
         return os.path.join(base_path, relative_path)
 
+
     def set_taskbar_icon(self, icon_path):
-        # Load the icon image
         icon_image = Image.open(icon_path)
         icon = pystray.Icon("ImageShareApp", icon_image)
 
         # Set the taskbar icon using ctypes
-        myappid = 'mycompany.myproduct.subproduct.version'  # Change this to your app's unique identifier
+        # Change this to your app's unique identifier
+        myappid = "mycompany.myproduct.subproduct.version"
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
         def run_icon():
             icon.run()
 
-        icon_thread = threading.Thread(target=run_icon, daemon=True)
-        icon_thread.start()
+        icon_thread = threading.Thread(target=run_icon, daemon=True).start()
+
 
     def create_main_window(self):
         self.clear_window()
@@ -100,8 +106,14 @@ class ImageShareApp:
         catcher_button.image = rounded_catcher_button_image
         catcher_button.pack(pady=10)
 
+
     def create_sender_window(self):
+        print("NEW SERVER")
+        self.server = Server(self.chunk_size, self.image_path)  
+        self.server_threading = threading.Thread(target=self.server.run, daemon=True)
+        
         self.clear_window()
+
         tk.Label(self.root, text="Sender Mode", font=("Arial", 20)).pack(pady=20)
         rounded_select_file_button_image = create_rounded_rectangle_image(150, 50, 20, "#1a80e5", "Select File",
                                                                           "#FFFFFF", self.font)
@@ -120,17 +132,19 @@ class ImageShareApp:
         back_button = tk.Button(self.root, image=self.back_icon_image, command=self.go_back, bd=0)
         back_button.place(x=10, y=10)
 
+
     def create_catcher_window(self):
+        threading.Thread(target=self.receive_file, daemon=True).start()
+
         self.clear_window()
+
         tk.Label(self.root, text="Catcher Mode", font=("Arial", 20)).pack(pady=20)
         self.image_label = tk.Label(self.root, text="The image sent by the sender will be here", font=("Arial", 12),
                                     width=40, height=10, relief="solid")
         self.image_label.pack(pady=10)
         back_button = tk.Button(self.root, image=self.back_icon_image, command=self.go_back, bd=0)
         back_button.place(x=10, y=10)
-        self.receiver_running = True
-        self.receiver_thread = threading.Thread(target=self.receive_file, daemon=True)
-        self.receiver_thread.start()
+
 
     def clear_window(self):
         # Store the current state of the window
@@ -141,82 +155,69 @@ class ImageShareApp:
                 widget.pack_forget() if widget.winfo_manager() == 'pack' else widget.place_forget()
         self.window_stack.append(state)
 
+
     def go_back(self):
-        self.receiver_running = False
         if self.window_stack:
             state = self.window_stack.pop()
             self.clear_window()  # Clear the current window before restoring the previous state
             for pack_info, widget in state:
                 widget.pack(**pack_info)
+            
             for widget in self.root.winfo_children():
-                if isinstance(widget, tk.Button):
-                    if widget.cget('text') == 'Sender':
-                        widget.config(command=self.create_sender_window)
-                    elif widget.cget('text') == 'Catcher':
-                        widget.config(command=self.create_catcher_window)
-                    elif widget.cget('text') == 'Select File':
-                        widget.config(command=self.select_file)
-                    elif widget.cget('text') == 'Send':
-                        widget.config(command=self.send_file)
-                    elif widget.cget('text') == 'Back':
-                        widget.config(command=self.go_back)
+                if not isinstance(widget, tk.Button): continue
+                match widget.cget("text"):
+                    case 'Sender': widget.config(command=self.create_sender_window)
+                    case 'Cathcer': widget.config(command=self.create_catcher_window)
+                    case 'Select File': widget.config(command=self.widget.config(command=self.select_file))
+                    case 'Send': widget.config(command=self.send_file)
+                    case 'Back': widget.config(command=self.go_back)
 
 
     def select_file(self):
         self.image_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg")])
         if self.image_path:
             messagebox.showinfo("Selected File", f"Selected: {os.path.basename(self.image_path)}")
+        
+        self.server.file_name = self.image_path
 
 
+    def receive_file(self): 
+        client = Client(self.chunk_size, self.client_name_files)
+        is_connected = False 
+        while not is_connected:
+            try:
+                client.client.connect(("localhost", 5050))
+                is_connected = True
+                print("CLIENT CONNECTED")
+            except: pass
+        
+        while True:
+            client.run()
+            if client.is_download:
+                self.display_image(f"{self.client_name_files}_{self.count_images}.jpg")
+                self.count_images += 1
+                client.is_download = False
+            if client.client_closed: break
+
+    
     def send_file(self):
         if not self.image_path:
             messagebox.showwarning("No File Selected", "Please select a file first.")
             return
-
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client.connect(('LAPTOP-TECV6IFT', 5050))
         
-        file = open(self.image_path, mode="rb")
-        data = file.read(self.chunk_size)
+        self.server.is_send = True
+        if not self.server_threading.is_alive():
+            self.server_threading.start()
 
-        while data:
-            client.send(data)
-            data = file.read(self.chunk_size)
-        
-        client.send(data)    
-        file.close()
-        self.image_path = None
 
-        client.close()
-
-    def receive_file(self):
-        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server.bind(('', 5050))
-        server.listen()
-
-        client_socket, client_address = server.accept()
-
-        while True:
-            data = client_socket.recv(self.chunk_size)
-            if not data: continue 
-
-            file = open("input_image.jpg", mode="wb")
-            while data != b'':
-                file.write(data)
-                data = client_socket.recv(self.chunk_size)
-                print(data)
-        
-            file.close()
-            self.display_image("input_image.jpg")
-        
-        server.close()
-
-    
     def display_image(self, image_path):
-        img = Image.open(image_path)
-        img = ImageTk.PhotoImage(img)
-        self.image_label.config(image=img, text="", width=img.width(), height=img.height())
-        self.image_label.image = img
+        try:
+            img = Image.open(image_path)
+            img = ImageTk.PhotoImage(img)
+            self.image_label.config(image=img, text="", width=img.width(), height=img.height())
+            self.image_label.image = img
+        except: 
+            messagebox.showwarning("Error reading file", "The sender sent an invalid file.")
 
 
 
