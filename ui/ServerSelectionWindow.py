@@ -1,0 +1,98 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
+
+from PIL import Image, ImageTk
+
+from ui.utils.rounded_button import create_rounded_rectangle_image
+
+
+class ServerSelectionWindow:
+    def __init__(self, root, app):
+        self.root = root
+        self.app = app
+        self.root.title("Server Selection")
+        self.root.geometry("450x350")
+        self.names = [
+            "Eduard", "Nikita", "Alexander", "Maria", "Polina", "Olga", "Ivan", "Sergey", "Dmitry", "Anna",
+            "Elena", "Vladimir", "Natalia", "Svetlana", "Yuri", "Tatiana", "Andrey", "Ekaterina", "Igor", "Irina",
+            "Maxim", "Galina", "Oleg", "Marina", "Alexey", "Larisa", "Boris", "Valentina", "Pavel", "Ludmila"
+        ]
+        self.selected_item = None
+        self.check_mark_image = ImageTk.PhotoImage(Image.open(r"C:\Users\Nikita\PycharmProjects\image_share\drawables\ic_check_mark.png"))
+        self.wifi_icon_image = ImageTk.PhotoImage(Image.open(r"C:\Users\Nikita\PycharmProjects\image_share\drawables\ic_wifi.png").resize((30, 30)))
+        self.create_ui()
+
+    def create_ui(self):
+        self.app.clear_window()
+        main_frame = ttk.Frame(self.root, padding=(10, 10, 10, 0))
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        main_frame.pack_propagate(False)  # Prevent the frame from resizing
+
+        label = ttk.Label(main_frame, text="Select a Server", font=("Arial", 20))
+        label.pack(pady=10)
+
+        # Create a frame to contain the canvas and scrollbar
+        canvas_container = ttk.Frame(main_frame)
+        canvas_container.pack(fill=tk.BOTH, expand=True, pady=(5, 0))  # Add padding to move the scroll view down
+
+        self.canvas = tk.Canvas(canvas_container, height=200)
+        self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        scrollbar = ttk.Scrollbar(canvas_container, orient=tk.VERTICAL, command=self.canvas.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.canvas.config(yscrollcommand=scrollbar.set)
+
+        self.canvas_frame = ttk.Frame(self.canvas)
+        self.canvas.create_window((0, 0), window=self.canvas_frame, anchor="nw")
+
+        self.canvas_frame.bind("<Configure>", self.on_frame_configure)
+        self.canvas.bind_all("<MouseWheel>", self.on_mouse_wheel)
+
+        for index, name in enumerate(self.names):
+            self.canvas.create_image(10, 30 * index + 20, anchor="w", image=self.wifi_icon_image, tags=f"icon_{index}")
+            self.canvas.create_text(50, 30 * index + 20, anchor="w", text=name, font=("Arial", 16),
+                                    tags=f"text_{index}")
+            self.canvas.tag_bind(f"text_{index}", "<Button-1>", lambda e, i=index: self.select_server(i))
+
+        # Add padding at the bottom of the canvas_frame
+        spacer = ttk.Frame(self.canvas_frame, height=50)
+        spacer.pack(fill=tk.X)
+
+        self.canvas_frame.update_idletasks()
+        self.canvas.config(scrollregion=self.canvas.bbox("all"))
+
+
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill=tk.X, pady=(0, 10))
+        self.rounded_submit_button_image = create_rounded_rectangle_image(150, 50, 20, "#1a80e5", "Submit", "#FFFFFF")
+        submit_button = tk.Button(button_frame, image=self.rounded_submit_button_image, bd=0, command=self.on_submit)
+        submit_button.pack()
+
+        # Add back button
+        back_button = tk.Button(self.root, image=self.app.back_icon_image, command=self.app.go_back, bd=0)
+        back_button.place(x=3, y=0)
+
+    def on_frame_configure(self, event):
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+
+    def on_mouse_wheel(self, event):
+        self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+    def select_server(self, index):
+        if self.selected_item is not None:
+            self.canvas.delete(f"check_{self.selected_item}")
+            if self.selected_item == index:
+                self.selected_item = None
+                return
+
+        self.selected_item = index
+        x1, y1, x2, y2 = self.canvas.bbox(f"text_{index}")
+        self.canvas.create_image(x2 + 20, (y1 + y2) // 2, image=self.check_mark_image, tags=f"check_{index}")
+
+    def on_submit(self):
+        if self.selected_item:
+            print(f"Selected server: {self.names[self.selected_item]}")
+            self.app.create_catcher_window()
+
+        else:
+            messagebox.showwarning("No Server Selected", "Please select a server to continue")

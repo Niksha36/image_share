@@ -27,15 +27,17 @@ class Server:
         
             file.close()
             self.file_name = None
-        
 
     def accept_clients(self):
         while not self.is_close:
             try:
                 client_socket, _ = self.server.accept()
-                threading.Thread(target=self.run, args=(client_socket, ), daemon=True).start()
-            except socket.timeout: 
+                threading.Thread(target=self.run, args=(client_socket,), daemon=True).start()
+            except socket.timeout:
                 pass
+            except OSError:
+                if self.is_close:
+                    break
 
 
     def close_server(self):
