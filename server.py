@@ -4,7 +4,7 @@ import threading
 class Server:
     def __init__(self, chunk_size, file_name):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server.bind(("", 5050))
+        self.server.bind(("localhost", 5050))
         self.server.listen()
         self.server.settimeout(2)
         self.is_close = False

@@ -1,14 +1,14 @@
-import tkinter as tk
-from tkinter import filedialog, messagebox, ttk
-
-from PIL import Image, ImageDraw, ImageTk, ImageFont
+import os
+import sys
 
 import socket
-import os
 import threading
 import ctypes
-import sys
 import pystray
+import tkinter as tk
+
+from tkinter import filedialog, messagebox, ttk
+from PIL import Image, ImageDraw, ImageTk, ImageFont
 
 from server import Server
 from client import Client
@@ -35,7 +35,7 @@ def create_rounded_rectangle_image(width, height, radius, fill_color, text, text
 
 
 class ImageShareApp:
-    def __init__(self, root):
+    def __init__(self, root: tk.Tk):
         self.root = root
         self.root.title("Image Share App")
         self.root.geometry("450x350")
@@ -48,7 +48,7 @@ class ImageShareApp:
         self.set_taskbar_icon(icon_path)
 
         self.window_stack = []
-        self.font_path = self.resource_path('fonts/Roboto-Regular.ttf')
+        self.font_path = self.resource_path("fonts/Roboto-Regular.ttf")
         self.font = ImageFont.truetype(self.font_path, 16)
 
         # Load the back arrow icon
@@ -61,8 +61,7 @@ class ImageShareApp:
         self.count_images = 0
         self.client_name_files = "input_image"
 
-
-    def resource_path(self, relative_path):
+    def resource_path(self, relative_path: str) -> str:
         try:
             # PyInstaller creates a temp folder and stores path in _MEIPASS
             base_path = sys._MEIPASS
@@ -71,8 +70,7 @@ class ImageShareApp:
 
         return os.path.join(base_path, relative_path)
 
-
-    def set_taskbar_icon(self, icon_path):
+    def set_taskbar_icon(self, icon_path: str) -> None:
         icon_image = Image.open(icon_path)
         icon = pystray.Icon("ImageShareApp", icon_image)
 
@@ -86,8 +84,7 @@ class ImageShareApp:
 
         icon_thread = threading.Thread(target=run_icon, daemon=True).start()
 
-
-    def create_main_window(self):
+    def create_main_window(self) -> None:
         self.clear_window()
         tk.Label(self.root, text="Choose Mode", font=("Arial", 20)).pack(pady=20)
         # Create the rounded rectangle image
@@ -106,8 +103,7 @@ class ImageShareApp:
         catcher_button.image = rounded_catcher_button_image
         catcher_button.pack(pady=10)
 
-
-    def create_sender_window(self):
+    def create_sender_window(self) -> None:
         self.server = Server(self.chunk_size, self.image_path)  
         threading.Thread(target=self.server.accept_clients, daemon=True).start()
         
@@ -131,8 +127,7 @@ class ImageShareApp:
         back_button = tk.Button(self.root, image=self.back_icon_image, command=self.go_back, bd=0)
         back_button.place(x=10, y=10)
 
-
-    def create_catcher_window(self):
+    def create_catcher_window(self) -> None:
         threading.Thread(target=self.receive_file, daemon=True).start()
         self.clear_window()
 
@@ -143,8 +138,7 @@ class ImageShareApp:
         back_button = tk.Button(self.root, image=self.back_icon_image, command=self.go_back, bd=0)
         back_button.place(x=10, y=10)
 
-
-    def clear_window(self):
+    def clear_window(self) -> None:
         # Store the current state of the window
         state = []
         for widget in self.root.winfo_children():
@@ -153,8 +147,7 @@ class ImageShareApp:
                 widget.pack_forget() if widget.winfo_manager() == 'pack' else widget.place_forget()
         self.window_stack.append(state)
 
-
-    def go_back(self):
+    def go_back(self) -> None:
         if self.window_stack:
             state = self.window_stack.pop()
             self.clear_window()  # Clear the current window before restoring the previous state
@@ -170,15 +163,12 @@ class ImageShareApp:
                     case 'Send': widget.config(command=self.send_file)
                     case 'Back': widget.config(command=self.go_back)
 
-
-    def select_file(self):
+    def select_file(self) -> None:
         self.image_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg")])
         if self.image_path:
             messagebox.showinfo("Selected File", f"Selected: {os.path.basename(self.image_path)}")
-        
 
-
-    def receive_file(self):        
+    def receive_file(self) -> None:        
         client = Client(self.chunk_size, self.client_name_files)
         
         is_connected = False 
@@ -188,7 +178,8 @@ class ImageShareApp:
                 client.client.connect(("localhost", 5050))
                 is_connected = True
                 print("CLIENT CONNECTED")
-            except: pass
+            except: 
+                pass
         
         while True:
             client.run()
@@ -197,17 +188,15 @@ class ImageShareApp:
                 self.count_images += 1
                 client.is_download = False
             if client.client_closed: break
-
     
-    def send_file(self):
+    def send_file(self) -> None:
         if not self.image_path:
             messagebox.showwarning("No File Selected", "Please select a file first.")
             return
         
         self.server.file_name = self.image_path
 
-
-    def display_image(self, image_path):
+    def display_image(self, image_path: str) -> None:
         try:
             img = Image.open(image_path)
             img = ImageTk.PhotoImage(img)
