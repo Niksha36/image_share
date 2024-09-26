@@ -108,9 +108,8 @@ class ImageShareApp:
 
 
     def create_sender_window(self):
-        print("NEW SERVER")
         self.server = Server(self.chunk_size, self.image_path)  
-        self.server_threading = threading.Thread(target=self.server.run, daemon=True)
+        threading.Thread(target=self.server.accept_clients, daemon=True).start()
         
         self.clear_window()
 
@@ -135,7 +134,6 @@ class ImageShareApp:
 
     def create_catcher_window(self):
         threading.Thread(target=self.receive_file, daemon=True).start()
-
         self.clear_window()
 
         tk.Label(self.root, text="Catcher Mode", font=("Arial", 20)).pack(pady=20)
@@ -178,12 +176,13 @@ class ImageShareApp:
         if self.image_path:
             messagebox.showinfo("Selected File", f"Selected: {os.path.basename(self.image_path)}")
         
-        self.server.file_name = self.image_path
 
 
-    def receive_file(self): 
+    def receive_file(self):        
         client = Client(self.chunk_size, self.client_name_files)
+        
         is_connected = False 
+        # TODO: Добавить значек загрузки (круглый крутится) пока клиент не подключился к серверу
         while not is_connected:
             try:
                 client.client.connect(("localhost", 5050))
@@ -205,9 +204,7 @@ class ImageShareApp:
             messagebox.showwarning("No File Selected", "Please select a file first.")
             return
         
-        self.server.is_send = True
-        if not self.server_threading.is_alive():
-            self.server_threading.start()
+        self.server.file_name = self.image_path
 
 
     def display_image(self, image_path):
@@ -218,7 +215,6 @@ class ImageShareApp:
             self.image_label.image = img
         except: 
             messagebox.showwarning("Error reading file", "The sender sent an invalid file.")
-
 
 
 if __name__ == "__main__":
