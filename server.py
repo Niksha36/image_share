@@ -7,8 +7,8 @@ class Server:
     def __init__(self, chunk_size, file_name, port):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind((socket.gethostbyname(socket.gethostname()), port))
-        self.server.listen()
-        self.server.settimeout(2)
+        
+        self.server.listen(4)
         self.is_close = False
         
         self.chunk_size = chunk_size

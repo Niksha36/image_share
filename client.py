@@ -4,6 +4,7 @@ import select
 class Client:
     def __init__(self, chunk_size, file_name):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client.settimeout(4)
         
         self.chunk_size = chunk_size
         self.file_name = file_name

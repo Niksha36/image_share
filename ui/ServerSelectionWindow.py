@@ -27,7 +27,7 @@ class ServerSelectionWindow:
 
         self.selected_item = None
         self.server_name = None
-        self.connect = False
+        self.is_parse = True
 
         self.check_mark_image = ImageTk.PhotoImage(Image.open(r".\drawables\ic_check_mark.png"))
         self.wifi_icon_image = ImageTk.PhotoImage(Image.open(r".\drawables\ic_wifi.png").resize((30, 30)))
@@ -77,7 +77,7 @@ class ServerSelectionWindow:
         submit_button.pack()
 
         # Add back button
-        back_button = tk.Button(self.root, image=self.app.back_icon_image, command=self.app.go_back, bd=0)
+        back_button = tk.Button(self.root, image=self.app.back_icon_image, command=self.go_back, bd=0)
         back_button.place(x=3, y=0)
 
     def on_frame_configure(self, event):
@@ -101,7 +101,8 @@ class ServerSelectionWindow:
         self.canvas.create_image(x2 + 20, (y1 + y2) // 2, image=self.check_mark_image, tags=f"check_{index}")
     
     def get_servers(self):
-        while not self.connect:
+        while self.is_parse:
+            print(self.is_parse)
             self.parser.parse(self.client_ip, self.port)
             for index, server_name in enumerate(self.parser.all_ip):
                 self.canvas.create_image(10, 30 * index + 20, anchor="w", image=self.wifi_icon_image, tags=f"icon_{index}")
@@ -114,7 +115,11 @@ class ServerSelectionWindow:
     def on_submit(self):
         if self.connect_server:
             print(f"Selected server: {self.connect_server}")
-            self.connect = True
+            self.is_parse = False
             self.app.create_catcher_window(self.connect_server)
         else:
             messagebox.showwarning("No Server Selected", "Please select a server to continue")
+    
+    def go_back(self):
+        self.is_parse = False
+        self.app.go_back()

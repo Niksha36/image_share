@@ -13,7 +13,6 @@ class CatcherWindow:
         self.root = root
         self.app = app
         
-        self.app.client = Client(self.app.chunk_size, self.app.client_name_files)
         self.server_ip = server_ip
         self.port = port
         threading.Thread(target=self.receive_file, daemon=True).start()
@@ -29,27 +28,28 @@ class CatcherWindow:
         back_button.place(x=10, y=10)
 
     def receive_file(self):
+        client = Client(self.app.chunk_size, self.app.client_name_files)
         try:
-            self.app.client.client.connect((self.server_ip, self.port))
+            client.client.connect((self.server_ip, self.port))
             print("CLIENT CONNECTED")
-        except socket.error:
+        except socket.error as e:
             messagebox.showwarning("Connection error", "Failed to connect to the server. Please try again later.")
             self.app.go_back()
             return
 
         while True:
             try:
-                self.app.client.run()
+                client.run()
             except:
                 messagebox.showwarning("Connection to the server was lost.", "Reconnect to the server.")
                 self.app.go_back()
                 return
 
-            if self.app.client.is_download:
+            if client.is_download:
                 self.display_image(f"{self.app.client_name_files}_{self.app.count_images}.jpg")
                 self.app.count_images += 1
-                self.app.client.is_download = False
-            if self.app.client.client_closed:
+                client.is_download = False
+            if client.client_closed:
                 break
 
     def display_image(self, image_path):
