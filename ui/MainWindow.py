@@ -9,7 +9,7 @@ class MainWindow:
         self.app = app
         self.create_main_window()
 
-    def create_main_window(self):
+    def create_main_window(self) -> None:
         self.app.clear_window()
         tk.Label(self.root, text="Choose Mode", font=("Arial", 20)).pack(pady=20)
         rounded_sender_button_image = create_rounded_rectangle_image(150, 50, 20, "#1a80e5", "Sender", "#FFFFFF", self.app.font)

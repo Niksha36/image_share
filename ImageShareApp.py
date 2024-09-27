@@ -11,7 +11,6 @@ from ui.CatcherWindow import CatcherWindow
 from ui.MainWindow import MainWindow
 from ui.SenderWindow import SenderWindow
 from ui.ServerSelectionWindow import ServerSelectionWindow
-#TODO: Почему-то после закрывания сервера клиент не закрывается
 
 class ImageShareApp:
     def __init__(self, root):
@@ -45,7 +44,7 @@ class ImageShareApp:
 
         self.create_main_window()
 
-    def resource_path(self, relative_path):
+    def resource_path(self, relative_path) -> None:
         try:
             # PyInstaller creates a temp folder and stores path in _MEIPASS
             base_path = sys._MEIPASS
@@ -54,7 +53,7 @@ class ImageShareApp:
 
         return os.path.join(base_path, relative_path)
 
-    def set_taskbar_icon(self, icon_path):
+    def set_taskbar_icon(self, icon_path) -> None:
         icon_image = Image.open(icon_path)
         icon = pystray.Icon("ImageShareApp", icon_image)
 
@@ -69,27 +68,27 @@ class ImageShareApp:
         threading.Thread(target=run_icon, daemon=True).start()
 
     #логика создания главного окна
-    def create_main_window(self):
+    def create_main_window(self) -> None:
         MainWindow(self.root, self)
 
     #Логика создание sender окна
-    def create_sender_window(self):
+    def create_sender_window(self) -> None:
         SenderWindow(self.root, self, self.port)
 
     # Логика создание catcher окна
-    def create_catcher_window(self, server_ip):
+    def create_catcher_window(self, server_ip) -> None:
         CatcherWindow(self.root, self, server_ip, self.port)
 
     # Логика окна выбора сервера
-    def create_server_selection_window(self):
+    def create_server_selection_window(self) -> None:
         ServerSelectionWindow(self.root, self, self.port)
 
     # функция отчищающая окно
-    def clear_window(self):
+    def clear_window(self) -> None:
         for widget in self.root.winfo_children():
             widget.pack_forget() if widget.winfo_manager() == 'pack' else widget.place_forget()
 
-    def go_back(self):
+    def go_back(self) -> None:
         if self.server:
             self.server.close_server()
             self.server = None  # Ensure the server is set to None after closing

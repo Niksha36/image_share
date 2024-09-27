@@ -15,11 +15,7 @@ class ServerSelectionWindow:
         self.root = root
         self.app = app
         self.root.geometry("450x350")
-        # self.names = [
-        #     "Eduard", "Nikita", "Alexander", "Maria", "Polina", "Olga", "Ivan", "Sergey", "Dmitry", "Anna",
-        #     "Elena", "Vladimir", "Natalia", "Svetlana", "Yuri", "Tatiana", "Andrey", "Ekaterina", "Igor", "Irina",
-        #     "Maxim", "Galina", "Oleg", "Marina", "Alexey", "Larisa", "Boris", "Valentina", "Pavel", "Ludmila"
-        # ]
+
         self.parser = Parser()
         self.client_ip = socket.gethostbyname(socket.gethostname())
         self.port = port
@@ -32,7 +28,7 @@ class ServerSelectionWindow:
         self.wifi_icon_image = ImageTk.PhotoImage(Image.open(r".\drawables\ic_wifi.png").resize((30, 30)))
         self.create_ui()
 
-    def create_ui(self):
+    def create_ui(self) -> None:
         self.app.clear_window()
         
         threading.Thread(target=self.get_servers, daemon=True).start()
@@ -79,14 +75,13 @@ class ServerSelectionWindow:
         back_button = tk.Button(self.root, image=self.app.back_icon_image, command=self.go_back, bd=0)
         back_button.place(x=3, y=0)
 
-    def on_frame_configure(self, event):
+    def on_frame_configure(self, event) -> None:
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
-    def on_mouse_wheel(self, event):
+    def on_mouse_wheel(self, event) -> None:
         self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
-    def select_server(self, index, server_name):
-        print(self.selected_item, index)
+    def select_server(self, index, server_name) -> None:
         if self.selected_item is not None:
             self.canvas.delete(f"check_{self.selected_item}")
             if self.selected_item == index:
@@ -99,19 +94,18 @@ class ServerSelectionWindow:
         x1, y1, x2, y2 = self.canvas.bbox(f"text_{index}")
         self.canvas.create_image(x2 + 20, (y1 + y2) // 2, image=self.check_mark_image, tags=f"check_{index}")
     
-    def get_servers(self):
+    def get_servers(self) -> None:
         while self.is_parse:
-            print(self.is_parse)
             self.parser.parse(self.client_ip, self.port)
             for index, server_name in enumerate(self.parser.all_ip):
                 self.canvas.create_image(10, 30 * index + 20, anchor="w", image=self.wifi_icon_image, tags=f"icon_{index}")
                 self.canvas.create_text(50, 30 * index + 20, anchor="w", text=server_name, font=("Arial", 16),
                                         tags=f"text_{index}")
                 self.canvas.tag_bind(f"text_{index}", "<Button-1>", lambda e, i=index: self.select_server(i, server_name))
-            time.sleep(1) # Для того чтобы работающие сервера не лагали из-за парсинга, ставим timeout
+            time.sleep(1)
 
 
-    def on_submit(self):
+    def on_submit(self) -> None:
         if self.connect_server:
             print(f"Selected server: {self.connect_server}")
             self.is_parse = False
@@ -119,6 +113,6 @@ class ServerSelectionWindow:
         else:
             messagebox.showwarning("No Server Selected", "Please select a server to continue")
     
-    def go_back(self):
+    def go_back(self) -> None:
         self.is_parse = False
         self.app.go_back()
