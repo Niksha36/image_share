@@ -14,7 +14,6 @@ class ServerSelectionWindow:
     def __init__(self, root, app, port=5050):
         self.root = root
         self.app = app
-        self.root.title("Server Selection")
         self.root.geometry("450x350")
         # self.names = [
         #     "Eduard", "Nikita", "Alexander", "Maria", "Polina", "Olga", "Ivan", "Sergey", "Dmitry", "Anna",
