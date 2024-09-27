@@ -15,6 +15,7 @@ class ServerSelectionWindow:
         self.root = root
         self.app = app
         self.root.geometry("450x350")
+        self.previous_ips = set()  # Set to store previously found IP addresses
         # self.names = [
         #     "Eduard", "Nikita", "Alexander", "Maria", "Polina", "Olga", "Ivan", "Sergey", "Dmitry", "Anna",
         #     "Elena", "Vladimir", "Natalia", "Svetlana", "Yuri", "Tatiana", "Andrey", "Ekaterina", "Igor", "Irina",
@@ -35,7 +36,7 @@ class ServerSelectionWindow:
     def create_ui(self):
         self.app.clear_window()
         
-        threading.Thread(target=self.get_servers, daemon=True).start()
+
 
         main_frame = ttk.Frame(self.root, padding=(10, 10, 10, 0))
         main_frame.pack(fill=tk.BOTH, expand=True)
@@ -79,6 +80,8 @@ class ServerSelectionWindow:
         back_button = tk.Button(self.root, image=self.app.back_icon_image, command=self.go_back, bd=0)
         back_button.place(x=3, y=0)
 
+        threading.Thread(target=self.get_servers, daemon=True).start()
+
     def on_frame_configure(self, event):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
@@ -98,17 +101,26 @@ class ServerSelectionWindow:
         self.connect_server= server_name
         x1, y1, x2, y2 = self.canvas.bbox(f"text_{index}")
         self.canvas.create_image(x2 + 20, (y1 + y2) // 2, image=self.check_mark_image, tags=f"check_{index}")
-    
+
     def get_servers(self):
         while self.is_parse:
             print(self.is_parse)
             self.parser.parse(self.client_ip, self.port)
-            for index, server_name in enumerate(self.parser.all_ip):
-                self.canvas.create_image(10, 30 * index + 20, anchor="w", image=self.wifi_icon_image, tags=f"icon_{index}")
-                self.canvas.create_text(50, 30 * index + 20, anchor="w", text=server_name, font=("Arial", 16),
-                                        tags=f"text_{index}")
-                self.canvas.tag_bind(f"text_{index}", "<Button-1>", lambda e, i=index: self.select_server(i, server_name))
-            time.sleep(1) # Для того чтобы работающие сервера не лагали из-за парсинга, ставим timeout
+            #TODO тут короче каждый раз когда парсятся сервера в первый раз мы получаем [] а только с раза 2 ip-шники
+            #TODO так что если серверов будет 2 штуки вполне вероятно если парсер не найдет сразу двоих будет много раз обновлять список
+            new_ips = set(self.parser.all_ip)
+
+            if new_ips and new_ips != self.previous_ips:
+                self.previous_ips = new_ips
+                self.canvas.delete("all")  # Clear the canvas before adding new items
+                for index, server_name in enumerate(self.parser.all_ip):
+                    self.canvas.create_image(10, 30 * index + 20, anchor="w", image=self.wifi_icon_image,
+                                             tags=f"icon_{index}")
+                    self.canvas.create_text(50, 30 * index + 20, anchor="w", text=server_name, font=("Arial", 16),
+                                            tags=f"text_{index}")
+                    self.canvas.tag_bind(f"text_{index}", "<Button-1>",
+                                         lambda e, i=index: self.select_server(i, server_name))
+            time.sleep(1)
 
 
     def on_submit(self):
