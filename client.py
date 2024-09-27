@@ -25,5 +25,6 @@ class Client:
             self.is_download = True
         
     def close_client(self):
+        print("CLIENT CLOSE")
         self.client.close()
         self.client_closed = True

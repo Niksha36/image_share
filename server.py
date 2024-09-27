@@ -1,18 +1,18 @@
 import socket
 import threading
 
+
+
 class Server:
-    def __init__(self, chunk_size, file_name):
+    def __init__(self, chunk_size, file_name, port):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server.bind(("", 5050))
+        self.server.bind((socket.gethostbyname(socket.gethostname()), port))
         self.server.listen()
         self.server.settimeout(2)
         self.is_close = False
         
         self.chunk_size = chunk_size
         self.file_name = file_name
-
-    
 
     def run(self, client_socket):
         while not self.is_close:
@@ -39,7 +39,7 @@ class Server:
                 if self.is_close:
                     break
 
-
     def close_server(self):
+        print("SERVER CLOSE")
         self.server.close()
         self.is_close = True

@@ -8,10 +8,11 @@ from ui.utils.rounded_button import create_rounded_rectangle_image
 
 
 class SenderWindow:
-    def __init__(self, root, app):
+    def __init__(self, root, app, port=5050):
         self.root = root
         self.app = app
-        self.app.server = Server(self.app.chunk_size, self.app.image_path)
+        
+        self.app.server = Server(self.app.chunk_size, self.app.image_path, port)
         threading.Thread(target=self.app.server.accept_clients, daemon=True).start()
         self.create_sender_window()
 

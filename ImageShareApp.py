@@ -11,7 +11,7 @@ from ui.CatcherWindow import CatcherWindow
 from ui.MainWindow import MainWindow
 from ui.SenderWindow import SenderWindow
 from ui.ServerSelectionWindow import ServerSelectionWindow
-
+#TODO: Почему-то после закрывания сервера клиент не закрывается
 
 class ImageShareApp:
     def __init__(self, root):
@@ -33,14 +33,14 @@ class ImageShareApp:
         # Load the back arrow icon
         back_icon_path = os.path.join(os.path.dirname(__file__), "drawables", "icon_back.png")
         self.back_icon_image = ImageTk.PhotoImage(file=back_icon_path)
-
+        
+        self.port = 5050
         self.chunk_size = 8192
         self.image_path = None
         self.count_images = 0
         self.client_name_files = "input_image"
 
         self.create_main_window()
-
 
     def resource_path(self, relative_path):
         try:
@@ -50,7 +50,6 @@ class ImageShareApp:
             base_path = os.path.abspath(".")
 
         return os.path.join(base_path, relative_path)
-
 
     def set_taskbar_icon(self, icon_path):
         icon_image = Image.open(icon_path)
@@ -72,15 +71,15 @@ class ImageShareApp:
 
     #Логика создание sender окна
     def create_sender_window(self):
-        SenderWindow(self.root, self)
+        SenderWindow(self.root, self, self.port)
 
     # Логика создание catcher окна
-    def create_catcher_window(self):
-        CatcherWindow(self.root, self)
+    def create_catcher_window(self, server_ip):
+        CatcherWindow(self.root, self, server_ip, self.port)
 
     # Логика окна выбора сервера
     def create_server_selection_window(self):
-        ServerSelectionWindow(self.root, self)
+        ServerSelectionWindow(self.root, self, self.port)
 
     # функция отчищающая окно
     def clear_window(self):
@@ -88,10 +87,10 @@ class ImageShareApp:
             widget.pack_forget() if widget.winfo_manager() == 'pack' else widget.place_forget()
 
     def go_back(self):
-        if hasattr(self, 'server') and self.server:
+        if hasattr(self, "server") and self.server:
             self.server.close_server()
             self.server = None  # Ensure the server is set to None after closing
-        if hasattr(self, 'client') and self.client:
+        if hasattr(self, "client") and self.client:
             self.client.close_client()
             self.client = None  # Ensure the client is set to None after closing
         self.create_main_window()

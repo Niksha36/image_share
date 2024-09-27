@@ -1,29 +1,43 @@
+import time
+import socket
+import threading
 import tkinter as tk
 from tkinter import ttk, messagebox
 
 from PIL import Image, ImageTk
 
 from ui.utils.rounded_button import create_rounded_rectangle_image
+from ip_parser import Parser
 
 
 class ServerSelectionWindow:
-    def __init__(self, root, app):
+    def __init__(self, root, app, port=5050):
         self.root = root
         self.app = app
         self.root.title("Server Selection")
         self.root.geometry("450x350")
-        self.names = [
-            "Eduard", "Nikita", "Alexander", "Maria", "Polina", "Olga", "Ivan", "Sergey", "Dmitry", "Anna",
-            "Elena", "Vladimir", "Natalia", "Svetlana", "Yuri", "Tatiana", "Andrey", "Ekaterina", "Igor", "Irina",
-            "Maxim", "Galina", "Oleg", "Marina", "Alexey", "Larisa", "Boris", "Valentina", "Pavel", "Ludmila"
-        ]
+        # self.names = [
+        #     "Eduard", "Nikita", "Alexander", "Maria", "Polina", "Olga", "Ivan", "Sergey", "Dmitry", "Anna",
+        #     "Elena", "Vladimir", "Natalia", "Svetlana", "Yuri", "Tatiana", "Andrey", "Ekaterina", "Igor", "Irina",
+        #     "Maxim", "Galina", "Oleg", "Marina", "Alexey", "Larisa", "Boris", "Valentina", "Pavel", "Ludmila"
+        # ]
+        self.parser = Parser()
+        self.client_ip = socket.gethostbyname(socket.gethostname())
+        self.port = port
+
         self.selected_item = None
-        self.check_mark_image = ImageTk.PhotoImage(Image.open(r"C:\Users\Nikita\PycharmProjects\image_share\drawables\ic_check_mark.png"))
-        self.wifi_icon_image = ImageTk.PhotoImage(Image.open(r"C:\Users\Nikita\PycharmProjects\image_share\drawables\ic_wifi.png").resize((30, 30)))
+        self.server_name = None
+        self.connect = False
+
+        self.check_mark_image = ImageTk.PhotoImage(Image.open(r".\drawables\ic_check_mark.png"))
+        self.wifi_icon_image = ImageTk.PhotoImage(Image.open(r".\drawables\ic_wifi.png").resize((30, 30)))
         self.create_ui()
 
     def create_ui(self):
         self.app.clear_window()
+        
+        threading.Thread(target=self.get_servers, daemon=True).start()
+
         main_frame = ttk.Frame(self.root, padding=(10, 10, 10, 0))
         main_frame.pack(fill=tk.BOTH, expand=True)
         main_frame.pack_propagate(False)  # Prevent the frame from resizing
@@ -47,12 +61,6 @@ class ServerSelectionWindow:
 
         self.canvas_frame.bind("<Configure>", self.on_frame_configure)
         self.canvas.bind_all("<MouseWheel>", self.on_mouse_wheel)
-
-        for index, name in enumerate(self.names):
-            self.canvas.create_image(10, 30 * index + 20, anchor="w", image=self.wifi_icon_image, tags=f"icon_{index}")
-            self.canvas.create_text(50, 30 * index + 20, anchor="w", text=name, font=("Arial", 16),
-                                    tags=f"text_{index}")
-            self.canvas.tag_bind(f"text_{index}", "<Button-1>", lambda e, i=index: self.select_server(i))
 
         # Add padding at the bottom of the canvas_frame
         spacer = ttk.Frame(self.canvas_frame, height=50)
@@ -78,21 +86,35 @@ class ServerSelectionWindow:
     def on_mouse_wheel(self, event):
         self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
-    def select_server(self, index):
+    def select_server(self, index, server_name):
+        print(self.selected_item, index)
         if self.selected_item is not None:
             self.canvas.delete(f"check_{self.selected_item}")
             if self.selected_item == index:
                 self.selected_item = None
+                self.connect_server = None
                 return
 
         self.selected_item = index
+        self.connect_server= server_name
         x1, y1, x2, y2 = self.canvas.bbox(f"text_{index}")
         self.canvas.create_image(x2 + 20, (y1 + y2) // 2, image=self.check_mark_image, tags=f"check_{index}")
+    
+    def get_servers(self):
+        while not self.connect:
+            self.parser.parse(self.client_ip, self.port)
+            for index, server_name in enumerate(self.parser.all_ip):
+                self.canvas.create_image(10, 30 * index + 20, anchor="w", image=self.wifi_icon_image, tags=f"icon_{index}")
+                self.canvas.create_text(50, 30 * index + 20, anchor="w", text=server_name, font=("Arial", 16),
+                                        tags=f"text_{index}")
+                self.canvas.tag_bind(f"text_{index}", "<Button-1>", lambda e, i=index: self.select_server(i, server_name))
+            time.sleep(2) # Для того чтобы работающие сервера не лагали из-за парсинга, ставим timeout
+
 
     def on_submit(self):
-        if self.selected_item:
-            print(f"Selected server: {self.names[self.selected_item]}")
-            self.app.create_catcher_window()
-
+        if self.connect_server:
+            print(f"Selected server: {self.connect_server}")
+            self.connect = True
+            self.app.create_catcher_window(self.connect_server)
         else:
             messagebox.showwarning("No Server Selected", "Please select a server to continue")

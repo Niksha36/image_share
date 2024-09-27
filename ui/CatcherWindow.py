@@ -8,10 +8,15 @@ from client import Client
 
 
 class CatcherWindow:
-    def __init__(self, root, app):
+    def __init__(self, root, app, server_ip, port):
         self.root = root
         self.app = app
+        
+        self.app.client = Client(self.app.chunk_size, self.app.client_name_files)
+        self.server_ip = server_ip
+        self.port = port
         threading.Thread(target=self.receive_file, daemon=True).start()
+        
         self.create_catcher_window()
 
     def create_catcher_window(self):
@@ -23,30 +28,33 @@ class CatcherWindow:
         back_button.place(x=10, y=10)
 
     def receive_file(self):
-        client = Client(self.app.chunk_size, self.app.client_name_files)
-
-        is_connected = False
-        # TODO: Add loading icon (spinning circle) while client is not connected to the server
-        while not is_connected:
-            try:
-                client.client.connect(("localhost", 5050))
-                is_connected = True
-                print("CLIENT CONNECTED")
-            except:
-                pass
+        print(self.server_ip, self.port)
+        try:
+            self.app.client.client.connect((self.server_ip, self.port))
+            print("CLIENT CONNECTED")
+        except:
+            messagebox.showwarning("Connection error", "Failed to connect to the server. Please try again later.")
+            self.app.go_back()
+            return
 
         while True:
-            client.run()
-            if client.is_download:
+            try:
+                self.app.client.run()
+            except:
+                messagebox.showwarning("Connection to the server was lost.", "Reconnect to the server.")
+                self.app.go_back()
+                return
+
+            if self.app.client.is_download:
                 self.display_image(f"{self.app.client_name_files}_{self.app.count_images}.jpg")
                 self.app.count_images += 1
-                client.is_download = False
-            if client.client_closed:
+                self.app.client.is_download = False
+            if self.app.client.client_closed:
                 break
 
     def display_image(self, image_path):
         try:
-            img = Image.open(image_path)  # Corrected this line
+            img = Image.open(image_path) 
             img = ImageTk.PhotoImage(img)
             self.app.image_label.config(image=img, text="", width=img.width(), height=img.height())
             self.app.image_label.image = img
