@@ -108,7 +108,7 @@ class ServerSelectionWindow:
                 self.canvas.create_text(50, 30 * index + 20, anchor="w", text=server_name, font=("Arial", 16),
                                         tags=f"text_{index}")
                 self.canvas.tag_bind(f"text_{index}", "<Button-1>", lambda e, i=index: self.select_server(i, server_name))
-            time.sleep(2) # Для того чтобы работающие сервера не лагали из-за парсинга, ставим timeout
+            time.sleep(5) # Для того чтобы работающие сервера не лагали из-за парсинга, ставим timeout
 
 
     def on_submit(self):

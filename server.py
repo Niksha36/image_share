@@ -16,17 +16,20 @@ class Server:
 
     def run(self, client_socket):
         while not self.is_close:
-            if not self.file_name: continue
+            try:
+                if not self.file_name: continue
 
-            file = open(self.file_name, mode="rb")
-            data = file.read(self.chunk_size)
-
-            while data:
-                client_socket.send(data)
+                file = open(self.file_name, mode="rb")
                 data = file.read(self.chunk_size)
-        
-            file.close()
-            self.file_name = None
+
+                while data:
+                    client_socket.send(data)
+                    data = file.read(self.chunk_size)
+            
+                file.close()
+                self.file_name = None
+            except: 
+                pass
 
     def accept_clients(self):
         while not self.is_close:

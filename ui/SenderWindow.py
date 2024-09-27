@@ -41,5 +41,6 @@ class SenderWindow:
         if not self.app.image_path:
             messagebox.showwarning("No File Selected", "Please select a file first.")
             return
-
+        
         self.app.server.file_name = self.app.image_path
+        self.app.image_path = None
