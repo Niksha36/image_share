@@ -88,5 +88,5 @@ if __name__ == "__main__":
 
     client_ip = socket.gethostbyname(socket.gethostname())
     print("IP ADRESS:", client_ip)
-    parser.parse(client_ip, 80)
+    parser.parse(client_ip, 5050)
     print(parser.all_ip)

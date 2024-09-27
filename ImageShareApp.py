@@ -40,6 +40,9 @@ class ImageShareApp:
         self.count_images = 0
         self.client_name_files = "input_image"
 
+        self.client = None
+        self.server = None
+
         self.create_main_window()
 
     def resource_path(self, relative_path):
@@ -87,10 +90,10 @@ class ImageShareApp:
             widget.pack_forget() if widget.winfo_manager() == 'pack' else widget.place_forget()
 
     def go_back(self):
-        if hasattr(self, "server") and self.server:
+        if self.server:
             self.server.close_server()
             self.server = None  # Ensure the server is set to None after closing
-        if hasattr(self, "client") and self.client:
+        if self.client:
             self.client.close_client()
             self.client = None  # Ensure the client is set to None after closing
         self.create_main_window()

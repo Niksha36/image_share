@@ -1,5 +1,6 @@
 import threading
 import tkinter as tk
+import socket
 from tkinter import messagebox
 
 from PIL import ImageTk, Image
@@ -28,11 +29,10 @@ class CatcherWindow:
         back_button.place(x=10, y=10)
 
     def receive_file(self):
-        print(self.server_ip, self.port)
         try:
             self.app.client.client.connect((self.server_ip, self.port))
             print("CLIENT CONNECTED")
-        except:
+        except socket.error:
             messagebox.showwarning("Connection error", "Failed to connect to the server. Please try again later.")
             self.app.go_back()
             return
