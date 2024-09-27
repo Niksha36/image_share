@@ -148,6 +148,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+#Image
+input_image*.jpg
+
 # pytype static type analyzer
 .pytype/
 

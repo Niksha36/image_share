@@ -20,3 +20,4 @@ class MainWindow:
         catcher_button = tk.Button(self.root, image=rounded_catcher_button_image, command=self.app.create_server_selection_window, bd=0)
         catcher_button.image = rounded_catcher_button_image
         catcher_button.pack(pady=10)
+        

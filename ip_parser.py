@@ -1,9 +1,10 @@
+from sys import stderr
 from threading import Thread, Lock
 from time import perf_counter
-from sys import stderr
-from time import sleep
-import socket
 
+import socket
+import psutil
+import ipaddress
 
 
 class Threads:
@@ -33,7 +34,7 @@ class Threads:
         for thread in self.threads:
             thread.join()
 
-    def worker(self, thread:Thread) -> None:
+    def worker(self, thread: Thread) -> None:
         while self.running and (len(self.functions) > 0):
             with self.functions_lock:
                 function, args = self.functions.pop(0)
@@ -45,42 +46,47 @@ class Threads:
 
 class Parser:
     def __init__(self, verbose=False):
-        self.all_ip = [] 
+        self.all_ip = None
         self.verbose = verbose
 
-    def parse(self, base_ip, port):
+    def parse(self, client_ip: str, port: int) -> None:
         self.all_ip = []
         self.start = perf_counter()
         socket.setdefaulttimeout(0.1)
 
         self.threader = Threads(30)
-        if "." in base_ip:
-            for i in range(1, 256):
-                self.threader.append(self.connect, base_ip + f".{i}", port)
-        else:
-            self.threader.append(self.connect, base_ip, port)
+        for ip in self.get_mask(client_ip):
+            self.threader.append(self.connect, ip, port)
+        
         self.threader.start()
         self.threader.join()
 
-    def connect(self, ip_address, port):
+    def connect(self, ip_address: str, port: int) -> None:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             result = sock.connect_ex((ip_address, port))
         with self.threader.print_lock:
             if result != 0: return
             self.all_ip.append(ip_address)
             if self.verbose:
-                stderr.write(f"[{perf_counter() - self.start:.5f}] Found {ip_address} HostName {self.getHost(ip_address)} Port {port}\n")
-    
-    def getHost(self, ip_addres):
-        try: 
-            return socket.gethostbyaddr(ip_addres)
-        except: 
-            return ""
+                stderr.write(f"[{perf_counter() - self.start:.5f}] Found {ip_address}\n")
 
+    def get_mask(self, client_ip: str) -> list[str]:
+        try:
+            for net in psutil.net_if_addrs()["Беспроводная сеть"]:
+                if net[1] == client_ip:
+                    mask = net[2]
+                    break
+
+            network = ipaddress.IPv4Network(f"{client_ip}/{mask}", strict=False)
+            return list(map(str, ipaddress.IPv4Network(f"{network.network_address}/{mask}")))     
+        except: 
+            return [client_ip[:client_ip.rfind(".")] + f".{i}" for i in range(256)]
+    
 
 if __name__ == "__main__":
-    parser = Parser(verbose=True)
+    parser = Parser(verbose=False)
 
     client_ip = socket.gethostbyname(socket.gethostname())
     print("IP ADRESS:", client_ip)
-    parser.parse(".".join(client_ip.split(".")[:2]) + ".144", 5050)
+    parser.parse(client_ip, 5050)
+    print(parser.all_ip)

@@ -8,10 +8,11 @@ from ui.utils.rounded_button import create_rounded_rectangle_image
 
 
 class SenderWindow:
-    def __init__(self, root, app):
+    def __init__(self, root, app, port=5050):
         self.root = root
         self.app = app
-        self.app.server = Server(self.app.chunk_size, self.app.image_path)
+        
+        self.app.server = Server(self.app.chunk_size, self.app.image_path, port)
         threading.Thread(target=self.app.server.accept_clients, daemon=True).start()
         self.create_sender_window()
 
@@ -40,5 +41,6 @@ class SenderWindow:
         if not self.app.image_path:
             messagebox.showwarning("No File Selected", "Please select a file first.")
             return
-
+        
         self.app.server.file_name = self.app.image_path
+        self.app.image_path = None
