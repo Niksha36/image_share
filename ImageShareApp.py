@@ -44,8 +44,7 @@ class ImageShareApp:
 
         self.create_main_window()
 
-    def resource_path(self, relative_path) -> None:
-        print(type(relative_path))
+    def resource_path(self, relative_path: str) -> None:
         try:
             # PyInstaller creates a temp folder and stores path in _MEIPASS
             base_path = sys._MEIPASS
