@@ -12,7 +12,6 @@ class SenderWindow:
     def __init__(self, root: tk.Tk, app):
         self.root = root
         self.app = app
-        
         self.app.server = Server(self.app.chunk_size, self.app.image_path, self.app.port)
         threading.Thread(target=self.app.server.accept_clients, daemon=True).start()
         self.create_sender_window()

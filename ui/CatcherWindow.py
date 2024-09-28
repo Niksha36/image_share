@@ -1,3 +1,6 @@
+import ctypes
+import os
+import tempfile
 import threading
 import tkinter as tk
 import socket
@@ -6,13 +9,14 @@ from tkinter import messagebox
 from PIL import ImageTk, Image
 
 from client import Client
+from ui.utils.rounded_button import create_rounded_rectangle_image
 
 
 class CatcherWindow:
     def __init__(self, root: tk.Tk, app, server_ip: str):
         self.root = root
         self.app = app
-        
+        self.root.geometry("500x450")
         self.server_ip = server_ip
         threading.Thread(target=self.receive_file, daemon=True).start()
         
@@ -20,8 +24,9 @@ class CatcherWindow:
 
     def create_catcher_window(self) -> None:
         self.app.clear_window()
-        
+        #text view with Catcher Mode text
         tk.Label(self.root, text="Catcher Mode", font=("Arial", 20)).pack(pady=20)
+        #image viewer
         self.app.image_label = tk.Label(
             self.root,
             highlightbackground="#339AF0",  # Border color
@@ -31,10 +36,31 @@ class CatcherWindow:
             text="The image sent by the sender will be here",
             font=("Arial", 12),
         )
-        self.app.image_label.place(x=40, y=85, relwidth=1, relheight=1, anchor="nw", width=-80, height=-120)
+        self.app.image_label.pack(padx=40, pady=(0, 5), fill=tk.BOTH, expand=True)
 
+        # set_image_as_background_button button
+        rounded_set_as_background_button_image = create_rounded_rectangle_image(
+            300, 50, 20, "#1a80e5", "Set image as desktop background", "#FFFFFF", self.app.font
+        )
+        set_image_as_background_button = tk.Button(
+            self.root, image=rounded_set_as_background_button_image, command=self.set_desktop_background, bd=0
+        )
+        set_image_as_background_button.image = rounded_set_as_background_button_image
+        set_image_as_background_button.pack(pady=(5,15))
+
+        #open file location button
+        rounded_set_as_background_button_image = create_rounded_rectangle_image(
+            300, 50, 20, "#1a80e5", "Open file location", "#FFFFFF", self.app.font
+        )
+        open_file_location_button = tk.Button(
+            self.root, image=rounded_set_as_background_button_image, command=self.open_file_location, bd=0
+        )
+        open_file_location_button.image = rounded_set_as_background_button_image
+        open_file_location_button.pack(pady=(0,20))
+
+        #back button
         back_button = tk.Button(self.root, image=self.app.back_icon_image, command=self.app.go_back, bd=0)
-        back_button.place(x=10, y=10)
+        back_button.place(x=10, y=5)
 
     def receive_file(self) -> None:
         self.app.client = Client(self.app.chunk_size, self.app.client_name_files)
@@ -48,7 +74,7 @@ class CatcherWindow:
 
         while self.app.client.client.fileno() != -1:
             try:
-                self.app.client.run()    
+                self.app.client.run()
             except:
                 messagebox.showwarning("Connection to the server was lost.", "Reconnect to the server.")
                 self.app.go_back()
@@ -92,3 +118,26 @@ class CatcherWindow:
             self.app.image_label.image = img
         except Exception as e:
             messagebox.showwarning("Error reading file", "The sender sent an invalid file.")
+
+    def set_desktop_background(self) -> None:
+        if self.app.client.image_path:
+            try:
+                # Open the image
+                img = Image.open(self.app.client.image_path)
+
+                # Create a temporary file
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.bmp') as tmpfile:
+                    bmp_path = tmpfile.name
+
+                # Save the image as BMP
+                img.save(bmp_path, 'BMP')
+
+                # Set the desktop background using ctypes
+                ctypes.windll.user32.SystemParametersInfoW(20, 0, bmp_path, 3)
+            except Exception as e:
+                messagebox.showwarning("Error", f"Failed to set desktop background: {e}")
+
+    def open_file_location(self) -> None:
+        if self.app.client and self.app.client.image_path:
+            file_path = os.path.abspath(self.app.client.image_path)
+            os.system(f'explorer /select,"{file_path.replace("/", "\\\\")}"')

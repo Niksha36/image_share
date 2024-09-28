@@ -7,6 +7,7 @@ class MainWindow:
     def __init__(self, root: tk.Tk, app):
         self.root = root
         self.app = app
+        self.root.geometry("450x350")
         self.create_main_window()
 
     def create_main_window(self) -> None:
