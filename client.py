@@ -12,11 +12,11 @@ class Client:
         self.file_name = file_name
         self.is_download = False
         self.counts_download = 0
-    
+
     def run(self) -> None:
         ready = select.select([self.client], [], [], 1)
         if ready[0] and self.client.fileno() != -1: 
-            self.image_path = f"{self.file_name}_{self.counts_download}"
+            self.image_path = os.path.join("received_images", f"{self.file_name}_{self.counts_download}")
             while os.path.exists(self.image_path + ".jpg"): self.image_path += "_0"
             self.image_path += ".jpg"
             
