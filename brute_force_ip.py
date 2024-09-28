@@ -44,12 +44,12 @@ class Threads:
             self.threads.remove(thread)
 
 
-class Parser:
+class BruteForceIp:
     def __init__(self, verbose=False):
         self.all_ip = None
         self.verbose = verbose
 
-    def parse(self, client_ip: str, port: int) -> None:
+    def search(self, client_ip: str, port: int) -> None:
         self.all_ip = set()
         self.start = perf_counter()
         socket.setdefaulttimeout(0.1)
@@ -85,9 +85,9 @@ class Parser:
     
 
 if __name__ == "__main__":
-    parser = Parser(verbose=False)
+    searcher = BruteForceIp(verbose=False)
 
     client_ip = socket.gethostbyname(socket.gethostname())
     print("IP ADRESS:", client_ip)
-    parser.parse(client_ip, 5050)
-    print(parser.all_ip)
+    searcher.search(client_ip, 5050)
+    print(searcher.all_ip)

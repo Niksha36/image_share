@@ -7,7 +7,7 @@ from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 
 from ui.utils.rounded_button import create_rounded_rectangle_image
-from ip_parser import Parser
+from brute_force_ip import BruteForceIp
 
 
 class ServerSelectionWindow:
@@ -16,13 +16,13 @@ class ServerSelectionWindow:
         self.app = app
         self.root.geometry("450x350")
 
-        self.parser = Parser()
+        self.searcher = BruteForceIp()
         self.client_ip = socket.gethostbyname(socket.gethostname())
         
         self.previous_ips = set()
         self.selected_item = None
         self.server_name = None
-        self.is_parse = True
+        self.is_search = True
 
         self.check_mark_image = ImageTk.PhotoImage(Image.open(r".\drawables\ic_check_mark.png"))
         self.wifi_icon_image = ImageTk.PhotoImage(Image.open(r".\drawables\ic_wifi.png").resize((30, 30)))
@@ -96,9 +96,9 @@ class ServerSelectionWindow:
         self.canvas.create_image(x2 + 20, (y1 + y2) // 2, image=self.check_mark_image, tags=f"check_{index}")
     
     def get_servers(self) -> None:        
-        while self.is_parse:
-            self.parser.parse(self.client_ip, self.app.port)
-            new_ips = self.parser.all_ip
+        while self.is_search :
+            self.searcher.search(self.client_ip, self.app.port)
+            new_ips = self.searcher.all_ip
 
             if new_ips and new_ips != self.previous_ips:
                 self.previous_ips = new_ips
@@ -115,11 +115,11 @@ class ServerSelectionWindow:
     def on_submit(self) -> None:
         if self.connect_server:
             print(f"Selected server: {self.connect_server}")
-            self.is_parse = False
+            self.is_search = False
             self.app.create_catcher_window(self.connect_server)
         else:
             messagebox.showwarning("No Server Selected", "Please select a server to continue")
     
     def go_back(self) -> None:
-        self.is_parse = False
+        self.is_search  = False
         self.app.go_back()
