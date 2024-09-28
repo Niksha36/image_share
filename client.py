@@ -3,14 +3,14 @@ import socket
 import select
 
 class Client:
-    def __init__(self, chunk_size, file_name):
+    def __init__(self, chunk_size: int, file_name: str):
+        print("CLIENT START")
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.settimeout(4)
         
         self.chunk_size = chunk_size
         self.file_name = file_name
         self.is_download = False
-        self.client_closed = False
         self.counts_download = 0
     
     def run(self) -> None:
@@ -23,9 +23,10 @@ class Client:
             file = open(self.image_path, mode="wb")
             while ready[0]:
                 data = self.client.recv(self.chunk_size)
+                if not data: raise
                 file.write(data)
                 ready = select.select([self.client], [], [], 1)
-            
+
             file.close()
             self.counts_download += 1
             self.is_download = True
@@ -33,4 +34,3 @@ class Client:
     def close_client(self) -> None:
         print("CLIENT CLOSE")
         self.client.close()
-        self.client_closed = True

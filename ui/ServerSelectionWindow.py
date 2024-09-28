@@ -11,14 +11,13 @@ from ip_parser import Parser
 
 
 class ServerSelectionWindow:
-    def __init__(self, root, app, port=5050):
+    def __init__(self, root: tk.Tk, app):
         self.root = root
         self.app = app
         self.root.geometry("450x350")
 
         self.parser = Parser()
         self.client_ip = socket.gethostbyname(socket.gethostname())
-        self.port = port
 
         self.selected_item = None
         self.server_name = None
@@ -75,13 +74,13 @@ class ServerSelectionWindow:
         back_button = tk.Button(self.root, image=self.app.back_icon_image, command=self.go_back, bd=0)
         back_button.place(x=3, y=0)
 
-    def on_frame_configure(self, event) -> None:
+    def on_frame_configure(self, event: tk.Event) -> None:
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
-    def on_mouse_wheel(self, event) -> None:
+    def on_mouse_wheel(self, event: tk.Event) -> None:
         self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
-    def select_server(self, index, server_name) -> None:
+    def select_server(self, index: int, server_name: str) -> None:
         if self.selected_item is not None:
             self.canvas.delete(f"check_{self.selected_item}")
             if self.selected_item == index:
@@ -96,14 +95,13 @@ class ServerSelectionWindow:
     
     def get_servers(self) -> None:
         while self.is_parse:
-            self.parser.parse(self.client_ip, self.port)
+            self.parser.parse(self.client_ip, self.app.port)
             for index, server_name in enumerate(self.parser.all_ip):
                 self.canvas.create_image(10, 30 * index + 20, anchor="w", image=self.wifi_icon_image, tags=f"icon_{index}")
                 self.canvas.create_text(50, 30 * index + 20, anchor="w", text=server_name, font=("Arial", 16),
                                         tags=f"text_{index}")
                 self.canvas.tag_bind(f"text_{index}", "<Button-1>", lambda e, i=index: self.select_server(i, server_name))
             time.sleep(1)
-
 
     def on_submit(self) -> None:
         if self.connect_server:

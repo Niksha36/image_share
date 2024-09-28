@@ -13,7 +13,7 @@ from ui.SenderWindow import SenderWindow
 from ui.ServerSelectionWindow import ServerSelectionWindow
 
 class ImageShareApp:
-    def __init__(self, root):
+    def __init__(self, root: tk.Tk, port: int):
         self.root = root
         self.root.title("Image Share App")
         self.root.geometry("450x350")
@@ -33,7 +33,7 @@ class ImageShareApp:
         back_icon_path = os.path.join(os.path.dirname(__file__), "drawables", "icon_back.png")
         self.back_icon_image = ImageTk.PhotoImage(file=back_icon_path)
         
-        self.port = 5050
+        self.port = port
         self.chunk_size = 8192
         self.image_path = None
         self.count_images = 0
@@ -45,6 +45,7 @@ class ImageShareApp:
         self.create_main_window()
 
     def resource_path(self, relative_path) -> None:
+        print(type(relative_path))
         try:
             # PyInstaller creates a temp folder and stores path in _MEIPASS
             base_path = sys._MEIPASS
@@ -73,15 +74,15 @@ class ImageShareApp:
 
     #Логика создание sender окна
     def create_sender_window(self) -> None:
-        SenderWindow(self.root, self, self.port)
+        SenderWindow(self.root, self)
 
     # Логика создание catcher окна
-    def create_catcher_window(self, server_ip) -> None:
-        CatcherWindow(self.root, self, server_ip, self.port)
+    def create_catcher_window(self, server_ip: str) -> None:
+        CatcherWindow(self.root, self, server_ip)
 
     # Логика окна выбора сервера
     def create_server_selection_window(self) -> None:
-        ServerSelectionWindow(self.root, self, self.port)
+        ServerSelectionWindow(self.root, self)
 
     # функция отчищающая окно
     def clear_window(self) -> None:
@@ -100,5 +101,5 @@ class ImageShareApp:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = ImageShareApp(root)
+    app = ImageShareApp(root, 5050)
     root.mainloop()

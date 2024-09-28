@@ -4,16 +4,16 @@ import time
 
 class Server:
     def __init__(self, chunk_size, file_name, port):
+        print("START SERVER")
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind((socket.gethostbyname(socket.gethostname()), port))
         self.server.listen()
 
-        self.is_close = False
         self.chunk_size = chunk_size
         self.file_name = file_name
 
     def run(self, client_socket) -> None:
-        while not self.is_close:
+        while self.server.fileno() != -1:
             try:
                 if not self.file_name: continue
                 with open(self.file_name, mode="rb") as file:
@@ -23,7 +23,7 @@ class Server:
                 break
 
     def accept_clients(self) -> None:
-        while not self.is_close:
+        while self.server.fileno() != -1:
             try:
                 client_socket, _ = self.server.accept()    
                 
@@ -35,4 +35,3 @@ class Server:
     def close_server(self) -> None:
         print("SERVER CLOSE")
         self.server.close()
-        self.is_close = True
