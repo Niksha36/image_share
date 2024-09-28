@@ -9,24 +9,19 @@ from client import Client
 
 
 class CatcherWindow:
-    def __init__(self, root, app, server_ip, port):
+    def __init__(self, root: tk.Tk, app, server_ip: str):
         self.root = root
         self.app = app
-
+        
         self.server_ip = server_ip
-        self.port = port
         threading.Thread(target=self.receive_file, daemon=True).start()
-
+        
         self.create_catcher_window()
 
-
-        # Через 5 сек устанавливается дефолтное изображение
-        # self.root.after(5000, self.set_default_image)
-
-    def create_catcher_window(self):
+    def create_catcher_window(self) -> None:
         self.app.clear_window()
+        
         tk.Label(self.root, text="Catcher Mode", font=("Arial", 20)).pack(pady=20)
-
         self.app.image_label = tk.Label(
             self.root,
             highlightbackground="#339AF0",  # Border color
@@ -41,39 +36,33 @@ class CatcherWindow:
         back_button = tk.Button(self.root, image=self.app.back_icon_image, command=self.app.go_back, bd=0)
         back_button.place(x=10, y=10)
 
-    # предпросмотр того как работает сейчас показ картинок
-    # def set_default_image(self):
-    #     default_image_path = r"C:\Users\Nikita\PycharmProjects\image_share\app_icon.png"
-    #     self.display_image(default_image_path)
-
-    def receive_file(self):
-        client = Client(self.app.chunk_size, self.app.client_name_files)
+    def receive_file(self) -> None:
+        self.app.client = Client(self.app.chunk_size, self.app.client_name_files)
         try:
-            client.client.connect((self.server_ip, self.port))
-            print("CLIENT CONNECTED")
+            self.app.client.client.connect((self.server_ip, self.app.port))
+            self.app.client.client.send(b"ITCLIENT")
         except socket.error as e:
             messagebox.showwarning("Connection error", "Failed to connect to the server. Please try again later.")
             self.app.go_back()
             return
 
-        while True:
+        while self.app.client.client.fileno() != -1:
             try:
-                client.run()
+                self.app.client.run()    
             except:
                 messagebox.showwarning("Connection to the server was lost.", "Reconnect to the server.")
                 self.app.go_back()
                 return
 
-            if client.is_download:
-                self.display_image(f"{self.app.client_name_files}_{self.app.count_images}.jpg")
+            if self.app.client is None: break
+            if  self.app.client.is_download:
+                self.display_image()
                 self.app.count_images += 1
-                client.is_download = False
-            if client.client_closed:
-                break
+                self.app.client.is_download = False
 
-    def display_image(self, image_path):
+    def display_image(self) -> None:
         try:
-            img = Image.open(image_path)
+            img = Image.open(self.app.client.image_path)
             label_width = self.app.image_label.winfo_width()
             label_height = self.app.image_label.winfo_height()
 
@@ -102,5 +91,4 @@ class CatcherWindow:
             )
             self.app.image_label.image = img
         except Exception as e:
-            print(e)
             messagebox.showwarning("Error reading file", "The sender sent an invalid file.")

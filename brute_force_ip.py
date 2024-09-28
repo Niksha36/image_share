@@ -44,20 +44,20 @@ class Threads:
             self.threads.remove(thread)
 
 
-class Parser:
+class BruteForceIp:
     def __init__(self, verbose=False):
         self.all_ip = None
         self.verbose = verbose
 
-    def parse(self, client_ip: str, port: int) -> None:
-        self.all_ip = []
+    def search(self, client_ip: str, port: int) -> None:
+        self.all_ip = set()
         self.start = perf_counter()
         socket.setdefaulttimeout(0.1)
 
         self.threader = Threads(30)
         for ip in self.get_mask(client_ip):
             self.threader.append(self.connect, ip, port)
-        
+
         self.threader.start()
         self.threader.join()
 
@@ -66,7 +66,8 @@ class Parser:
             result = sock.connect_ex((ip_address, port))
         with self.threader.print_lock:
             if result != 0: return
-            self.all_ip.append(ip_address)
+            
+            self.all_ip.add(ip_address)
             if self.verbose:
                 stderr.write(f"[{perf_counter() - self.start:.5f}] Found {ip_address}\n")
 
@@ -84,9 +85,9 @@ class Parser:
     
 
 if __name__ == "__main__":
-    parser = Parser(verbose=False)
+    searcher = BruteForceIp(verbose=False)
 
     client_ip = socket.gethostbyname(socket.gethostname())
     print("IP ADRESS:", client_ip)
-    parser.parse(client_ip, 5050)
-    print(parser.all_ip)
+    searcher.search(client_ip, 5050)
+    print(searcher.all_ip)

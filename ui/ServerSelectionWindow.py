@@ -7,36 +7,31 @@ from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 
 from ui.utils.rounded_button import create_rounded_rectangle_image
-from ip_parser import Parser
+from brute_force_ip import BruteForceIp
 
 
 class ServerSelectionWindow:
-    def __init__(self, root, app, port=5050):
+    def __init__(self, root: tk.Tk, app):
         self.root = root
         self.app = app
         self.root.geometry("450x350")
-        self.previous_ips = set()  # Set to store previously found IP addresses
-        # self.names = [
-        #     "Eduard", "Nikita", "Alexander", "Maria", "Polina", "Olga", "Ivan", "Sergey", "Dmitry", "Anna",
-        #     "Elena", "Vladimir", "Natalia", "Svetlana", "Yuri", "Tatiana", "Andrey", "Ekaterina", "Igor", "Irina",
-        #     "Maxim", "Galina", "Oleg", "Marina", "Alexey", "Larisa", "Boris", "Valentina", "Pavel", "Ludmila"
-        # ]
-        self.parser = Parser()
-        self.client_ip = socket.gethostbyname(socket.gethostname())
-        self.port = port
 
+        self.searcher = BruteForceIp()
+        self.client_ip = socket.gethostbyname(socket.gethostname())
+        
+        self.previous_ips = set()
         self.selected_item = None
         self.server_name = None
-        self.is_parse = True
+        self.is_search = True
 
         self.check_mark_image = ImageTk.PhotoImage(Image.open(r".\drawables\ic_check_mark.png"))
         self.wifi_icon_image = ImageTk.PhotoImage(Image.open(r".\drawables\ic_wifi.png").resize((30, 30)))
         self.create_ui()
 
-    def create_ui(self):
+    def create_ui(self) -> None:
         self.app.clear_window()
         
-
+        threading.Thread(target=self.get_servers, daemon=True).start()
 
         main_frame = ttk.Frame(self.root, padding=(10, 10, 10, 0))
         main_frame.pack(fill=tk.BOTH, expand=True)
@@ -76,20 +71,18 @@ class ServerSelectionWindow:
         submit_button = tk.Button(button_frame, image=self.rounded_submit_button_image, bd=0, command=self.on_submit)
         submit_button.pack()
 
-        # Add back button
         back_button = tk.Button(self.root, image=self.app.back_icon_image, command=self.go_back, bd=0)
         back_button.place(x=3, y=0)
 
         threading.Thread(target=self.get_servers, daemon=True).start()
 
-    def on_frame_configure(self, event):
+    def on_frame_configure(self, event: tk.Event) -> None:
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
-    def on_mouse_wheel(self, event):
+    def on_mouse_wheel(self, event: tk.Event) -> None:
         self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
-    def select_server(self, index, server_name):
-        print(self.selected_item, index)
+    def select_server(self, index: int, server_name: str) -> None:
         if self.selected_item is not None:
             self.canvas.delete(f"check_{self.selected_item}")
             if self.selected_item == index:
@@ -98,22 +91,19 @@ class ServerSelectionWindow:
                 return
 
         self.selected_item = index
-        self.connect_server= server_name
+        self.connect_server = server_name
         x1, y1, x2, y2 = self.canvas.bbox(f"text_{index}")
         self.canvas.create_image(x2 + 20, (y1 + y2) // 2, image=self.check_mark_image, tags=f"check_{index}")
-
-    def get_servers(self):
-        while self.is_parse:
-            print(self.is_parse)
-            self.parser.parse(self.client_ip, self.port)
-            #TODO тут короче каждый раз когда парсятся сервера в первый раз мы получаем [] а только с раза 2 ip-шники
-            #TODO так что если серверов будет 2 штуки вполне вероятно если парсер не найдет сразу двоих будет много раз обновлять список
-            new_ips = set(self.parser.all_ip)
+    
+    def get_servers(self) -> None:        
+        while self.is_search :
+            self.searcher.search(self.client_ip, self.app.port)
+            new_ips = self.searcher.all_ip
 
             if new_ips and new_ips != self.previous_ips:
                 self.previous_ips = new_ips
                 self.canvas.delete("all")  # Clear the canvas before adding new items
-                for index, server_name in enumerate(self.parser.all_ip):
+                for index, server_name in enumerate(self.previous_ips):
                     self.canvas.create_image(10, 30 * index + 20, anchor="w", image=self.wifi_icon_image,
                                              tags=f"icon_{index}")
                     self.canvas.create_text(50, 30 * index + 20, anchor="w", text=server_name, font=("Arial", 16),
@@ -122,15 +112,14 @@ class ServerSelectionWindow:
                                          lambda e, i=index: self.select_server(i, server_name))
             time.sleep(1)
 
-
-    def on_submit(self):
+    def on_submit(self) -> None:
         if self.connect_server:
             print(f"Selected server: {self.connect_server}")
-            self.is_parse = False
+            self.is_search = False
             self.app.create_catcher_window(self.connect_server)
         else:
             messagebox.showwarning("No Server Selected", "Please select a server to continue")
     
-    def go_back(self):
-        self.is_parse = False
+    def go_back(self) -> None:
+        self.is_search  = False
         self.app.go_back()
