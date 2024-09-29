@@ -1,5 +1,6 @@
 import ctypes
 import os
+import subprocess
 import tempfile
 import threading
 import tkinter as tk
@@ -67,15 +68,19 @@ class CatcherWindow:
         try:
             self.app.client.client.connect((self.server_ip, self.app.port))
             self.app.client.client.send(b"ITCLIENT")
-        except socket.error as e:
+        except socket.error:
             messagebox.showwarning("Connection error", "Failed to connect to the server. Please try again later.")
             self.app.go_back()
             return
 
+        if not os.path.exists("received_images"):
+            os.makedirs("received_images")
+
         while self.app.client.client.fileno() != -1:
             try:
                 self.app.client.run()
-            except:
+            except Exception as e:
+                print(e)
                 messagebox.showwarning("Connection to the server was lost.", "Reconnect to the server.")
                 self.app.go_back()
                 return
@@ -136,8 +141,11 @@ class CatcherWindow:
                 ctypes.windll.user32.SystemParametersInfoW(20, 0, bmp_path, 3)
             except Exception as e:
                 messagebox.showwarning("Error", f"Failed to set desktop background: {e}")
+        else:
+            messagebox.showwarning("Error", "No images have been received yet.")
 
     def open_file_location(self) -> None:
-        if self.app.client and self.app.client.image_path:
-            file_path = os.path.abspath(self.app.client.image_path)
-            os.system(f'explorer /select,"{file_path.replace("/", "\\\\")}"')
+        if self.app.client.image_path:
+            os.startfile(os.path.realpath(os.curdir) + "\\received_images")
+        else:
+            messagebox.showwarning("Error", "No images have been received yet.")

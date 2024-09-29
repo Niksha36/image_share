@@ -151,6 +151,9 @@ dmypy.json
 #Image
 input_image*.jpg
 
+#Folder
+/received_images
+
 # pytype static type analyzer
 .pytype/
 
