@@ -95,7 +95,7 @@ class CatcherWindow:
         try:
             img = Image.open(self.app.client.image_path)
             label_width = self.app.image_label.winfo_width()
-            label_height = self.app.image_label.winfo_height()
+            label_height = 223
 
             # Calculate the aspect ratio
             img_ratio = img.width / img.height
