@@ -91,61 +91,82 @@ class CatcherWindow:
                 self.app.count_images += 1
                 self.app.client.is_download = False
 
+    def is_image_file(self, file_path: str) -> bool:
+        image_extensions = ['.png', '.jpg', '.jpeg', '.bmp', '.gif']
+        file_extension = os.path.splitext(file_path)[1].lower()
+        return file_extension in image_extensions
+
     def display_image(self) -> None:
         try:
-            img = Image.open(self.app.client.image_path)
-            label_width = self.app.image_label.winfo_width()
-            label_height = 223
+            if self.is_image_file(self.app.client.file_path):
+                img = Image.open(self.app.client.file_path)
+                label_width = self.app.image_label.winfo_width()
+                label_height = 223
 
-            # Calculate the aspect ratio
-            img_ratio = img.width / img.height
-            label_ratio = label_width / label_height
+                img_ratio = img.width / img.height
+                label_ratio = label_width / label_height
 
-            if img_ratio > label_ratio:
-                # Image is wider than the label
-                new_width = label_width
-                new_height = int(label_width / img_ratio)
+                if img_ratio > label_ratio:
+                    new_width = label_width
+                    new_height = int(label_width / img_ratio)
+                else:
+                    new_height = label_height
+                    new_width = int(label_height * img_ratio)
+
+                img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+                img = ImageTk.PhotoImage(img)
+                self.app.image_label.config(
+                    image=img,
+                    text="",
+                    width=new_width,
+                    height=new_height,
+                    highlightthickness=0,
+                    relief="flat"
+                )
+                self.app.image_label.image = img
             else:
-                # Image is taller than the label
-                new_height = label_height
-                new_width = int(label_height * img_ratio)
-
-            img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-            img = ImageTk.PhotoImage(img)
-            self.app.image_label.config(
-                image=img,
-                text="",
-                width=new_width,
-                height=new_height,
-                highlightthickness=0,  # Remove border
-                relief="flat"  # Remove border style
-            )
-            self.app.image_label.image = img
+                doc_img = ImageTk.PhotoImage(file="./drawables/ic_document_selected.png")
+                self.app.image_label.config(
+                    image=doc_img,
+                    text="",
+                    width=doc_img.width(),
+                    height=doc_img.height(),
+                    highlightthickness=0,
+                    relief="flat"
+                )
+                self.app.image_label.image = doc_img
+                file_name_label = tk.Label(self.root, text=os.path.basename(self.app.client.file_path),
+                                           font=(self.app.font, 12))
+                file_name_label.pack()
         except Exception as e:
+            print(f"Error: {e}")
             messagebox.showwarning("Error reading file", "The sender sent an invalid file.")
 
     def set_desktop_background(self) -> None:
-        if self.app.client.image_path:
-            try:
-                # Open the image
-                img = Image.open(self.app.client.image_path)
+        if self.app.client.file_path:
+            if self.is_image_file(self.app.client.file_path):
+                try:
+                    # Open the image
+                    img = Image.open(self.app.client.file_path)
 
-                # Create a temporary file
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.bmp') as tmpfile:
-                    bmp_path = tmpfile.name
+                    # Create a temporary file
+                    with tempfile.NamedTemporaryFile(delete=False, suffix='.bmp') as tmpfile:
+                        bmp_path = tmpfile.name
 
-                # Save the image as BMP
-                img.save(bmp_path, 'BMP')
+                    # Save the image as BMP
+                    img.save(bmp_path, 'BMP')
 
-                # Set the desktop background using ctypes
-                ctypes.windll.user32.SystemParametersInfoW(20, 0, bmp_path, 3)
-            except Exception as e:
-                messagebox.showwarning("Error", f"Failed to set desktop background: {e}")
+                    # Set the desktop background using ctypes
+                    ctypes.windll.user32.SystemParametersInfoW(20, 0, bmp_path, 3)
+                except Exception as e:
+                    messagebox.showwarning("Error", f"Failed to set desktop background: {e}")
+            else:
+                messagebox.showwarning("Error", f"You can set only images as desktop background")
         else:
             messagebox.showwarning("Error", "No images have been received yet.")
 
     def open_file_location(self) -> None:
-        if self.app.client.image_path:
+        if self.app.client.file_path:
             os.startfile(os.path.realpath(os.curdir) + "\\received_images")
         else:
             messagebox.showwarning("Error", "No images have been received yet.")

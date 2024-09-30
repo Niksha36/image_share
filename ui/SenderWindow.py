@@ -13,7 +13,7 @@ class SenderWindow:
         self.root = root
         self.app = app
         
-        self.app.server = Server(self.app.image_path, self.app.port)
+        self.app.server = Server(self.app.file_path, self.app.port)
         threading.Thread(target=self.app.server.accept_clients, daemon=True).start()
         self.create_sender_window()
 
@@ -42,30 +42,35 @@ class SenderWindow:
         back_button.place(x=10, y=10)
 
     def select_file(self) -> None:
-        self.app.image_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg")])
-        if self.app.image_path:
-            image_selected = tk.PhotoImage(file="./drawables/ic_image_selected.png")
-            messagebox.showinfo("Selected File", f"Selected: {os.path.basename(self.app.image_path)}")
+        self.app.file_path = filedialog.askopenfilename(filetypes=[("Documents and Images", "*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.pdf;*.doc;*.docx;*.txt")])
+        if self.app.file_path:
+            file_extension = os.path.splitext(self.app.file_path)[1].lower()
+            image_extensions = ['.png', '.jpg', '.jpeg', '.bmp', '.gif']
 
-            image_name = os.path.basename(self.app.image_path)
+            image_selected = tk.PhotoImage(file="./drawables/ic_image_selected.png") if file_extension in image_extensions else tk.PhotoImage(file="./drawables/ic_document_selected.png")
+            self.image_condition_label.config(image=image_selected)
+            self.image_condition_label.image = image_selected
+            messagebox.showinfo("Selected File", f"Selected: {os.path.basename(self.app.file_path)}")
+
+            image_name = os.path.basename(self.app.file_path)
             self.image_name_label.config(text = image_name, font=(self.app.font, 12))
             self.image_condition_label.config(image=image_selected)
             self.image_condition_label.image = image_selected
             self.image_condition_label.bind("<Button-1>", self.open_image)
         else:
-            self.app.image_path = None
+            self.app.file_path = None
 
     def open_image(self, event: tk.Event) -> None:
         def run():
-            if self.app.image_path:
-                webbrowser.open(self.app.image_path)
+            if self.app.file_path:
+                webbrowser.open(self.app.file_path)
 
         threading.Thread(target=run, daemon=True).start()
 
     def send_file(self) -> None:
-        if not self.app.image_path:
+        if not self.app.file_path:
             messagebox.showwarning("No File Selected", "Please select a file first.")
             return
         
-        self.app.server.file_name = self.app.image_path
+        self.app.server.file_path = self.app.file_path
         messagebox.showinfo("Success", "Image was successfully sent")

@@ -35,7 +35,7 @@ class ImageShareApp:
         
         self.port = port
         self.chunk_size = 8192
-        self.image_path = None
+        self.file_path = None
         self.count_images = 0
         self.client_name_files = "input_image"
 
