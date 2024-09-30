@@ -20,6 +20,8 @@ class CatcherWindow:
         self.root.geometry("500x450")
         self.server_ip = server_ip
         threading.Thread(target=self.receive_file, daemon=True).start()
+
+        self.prev_image_path = None
         
         self.create_catcher_window()
 
@@ -80,7 +82,6 @@ class CatcherWindow:
             try:
                 self.app.client.run()
             except Exception as e:
-                print(e)
                 messagebox.showwarning("Connection to the server was lost.", "Reconnect to the server.")
                 self.app.go_back()
                 return
@@ -96,6 +97,8 @@ class CatcherWindow:
             img = Image.open(self.app.client.image_path)
             label_width = self.app.image_label.winfo_width()
             label_height = 223
+
+            self.prev_image_path = self.app.client.image_path
 
             # Calculate the aspect ratio
             img_ratio = img.width / img.height
@@ -121,13 +124,13 @@ class CatcherWindow:
                 relief="flat"  # Remove border style
             )
             self.app.image_label.image = img
-        except Exception as e:
+        except:
+            self.app.client.image_path = self.prev_image_path
             messagebox.showwarning("Error reading file", "The sender sent an invalid file.")
 
     def set_desktop_background(self) -> None:
         if self.app.client.image_path:
             try:
-                # Open the image
                 img = Image.open(self.app.client.image_path)
 
                 # Create a temporary file

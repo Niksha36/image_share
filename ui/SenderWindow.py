@@ -15,6 +15,7 @@ class SenderWindow:
         
         self.app.server = Server(self.app.image_path, self.app.port)
         threading.Thread(target=self.app.server.accept_clients, daemon=True).start()
+
         self.create_sender_window()
 
     def create_sender_window(self) -> None:
@@ -42,18 +43,18 @@ class SenderWindow:
         back_button.place(x=10, y=10)
 
     def select_file(self) -> None:
-        self.app.image_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg")])
-        if self.app.image_path:
-            image_selected = tk.PhotoImage(file="./drawables/ic_image_selected.png")
-            messagebox.showinfo("Selected File", f"Selected: {os.path.basename(self.app.image_path)}")
+        image_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg")])
+        if not image_path: return
+        
+        self.app.image_path = image_path
+        image_selected = tk.PhotoImage(file="./drawables/ic_image_selected.png")
+        messagebox.showinfo("Selected File", f"Selected: {os.path.basename(self.app.image_path)}")
 
-            image_name = os.path.basename(self.app.image_path)
-            self.image_name_label.config(text = image_name, font=(self.app.font, 12))
-            self.image_condition_label.config(image=image_selected)
-            self.image_condition_label.image = image_selected
-            self.image_condition_label.bind("<Button-1>", self.open_image)
-        else:
-            self.app.image_path = None
+        image_name = os.path.basename(self.app.image_path)
+        self.image_name_label.config(text = image_name, font=(self.app.font, 12))
+        self.image_condition_label.config(image=image_selected)
+        self.image_condition_label.image = image_selected
+        self.image_condition_label.bind("<Button-1>", self.open_image)
 
     def open_image(self, event: tk.Event) -> None:
         def run():
