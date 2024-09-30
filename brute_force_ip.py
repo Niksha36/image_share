@@ -32,7 +32,10 @@ class Threads:
 
     def join(self) -> None:
         for thread in self.threads:
-            thread.join()
+            try:
+                thread.join()
+            except:
+                continue
 
     def worker(self, thread: Thread) -> None:
         while self.running and (len(self.functions) > 0):
