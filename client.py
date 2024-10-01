@@ -23,8 +23,10 @@ class Client:
         ready = select.select([self.client], [], [], 1)
         if ready[0] and self.client.fileno() != -1:
             file_name = self.client.recv(1024).decode().strip().split('\n')
+            print(file_name)
             if len(file_name) < 2:
                 raise Exception("Invalid file name or extension received")
+            print(1)
             file_name, file_extension = file_name
             self.file_path = os.path.join("./received_images", f"{self.file_name}_{self.counts_download}")
             while os.path.exists(self.file_path + file_extension):
