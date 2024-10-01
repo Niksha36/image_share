@@ -26,9 +26,9 @@ This project is a minimalistic desktop application designed to send and receive 
 
 **Sender mode**
 </p>
-        <img src="https://github.com/user-attachments/assets/89c41cee-f3a0-406e-88ad-3ed287f501c5" alt="2" style="width: 50%; height: auto;"/>
-        <img src="https://github.com/user-attachments/assets/e51e89a5-4368-4f2f-80f7-b46aedc92c61" alt="3" style="width: 50%; height: auto;"/>
-        <img src="https://github.com/user-attachments/assets/24bb0a0e-fa4d-46d7-aae5-5231bdb2b40c" alt="4" style="width: 50%; height: auto;"/>
+        <img src="https://github.com/user-attachments/assets/89c41cee-f3a0-406e-88ad-3ed287f501c5" alt="2" style="width: 50%; height: auto; display: inline-block;"/>
+        <img src="https://github.com/user-attachments/assets/e51e89a5-4368-4f2f-80f7-b46aedc92c61" alt="3" style="width: 50%; height: auto; display: inline-block;"/>
+        <img src="https://github.com/user-attachments/assets/24bb0a0e-fa4d-46d7-aae5-5231bdb2b40c" alt="4" style="width: 50%; height: auto; display: inline-block;"/>
 </p>
 
 **Catcher mode**
