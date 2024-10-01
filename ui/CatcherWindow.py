@@ -21,7 +21,7 @@ class CatcherWindow:
         self.server_ip = server_ip
         threading.Thread(target=self.receive_file, daemon=True).start()
 
-        self.prev_image_path = None
+        self.prev_image = None
         
         self.create_catcher_window()
 
@@ -40,7 +40,9 @@ class CatcherWindow:
             font=("Arial", 12),
         )
         self.app.image_label.pack(padx=40, pady=(0, 5), fill=tk.BOTH, expand=True)
-
+        
+        self.image_name_label = tk.Label(self.root, text="")
+        self.image_name_label.pack(pady=(0, 15))
         # set_image_as_background_button button
         rounded_set_as_background_button_image = create_rounded_rectangle_image(
             300, 50, 20, "#1a80e5", "Set image as desktop background", "#FFFFFF", self.app.font
@@ -66,7 +68,7 @@ class CatcherWindow:
         back_button.place(x=10, y=5)
 
     def receive_file(self) -> None:
-        self.app.client = Client(self.app.chunk_size, self.app.client_name_files)
+        self.app.client = Client(self.app.chunk_size)
         try:
             self.app.client.client.connect((self.server_ip, self.app.port))
             self.app.client.client.send(b"ITCLIENT")
@@ -82,34 +84,44 @@ class CatcherWindow:
             try:
                 self.app.client.run()
             except Exception as e:
+                print(e)
                 messagebox.showwarning("Connection to the server was lost.", "Reconnect to the server.")
                 self.app.go_back()
                 return
 
             if self.app.client is None: break
-            if  self.app.client.is_download:
+            if self.app.client.is_download:
                 self.display_image()
-                self.app.count_images += 1
                 self.app.client.is_download = False
-
+    
+    def is_image_file(self, file_path: str) -> bool:
+        image_extensions = ['.png', '.jpg', '.jpeg', '.bmp', '.gif']
+        file_extension = os.path.splitext(file_path)[1].lower()
+        return file_extension in image_extensions
+        
     def display_image(self) -> None:
-        try:
-            img = Image.open(self.app.client.image_path)
+        if self.is_image_file(self.app.client.file_path):
+            self.image_name_label.config(text="", font=(self.app.font, 14))
+            
+            try:
+                img = Image.open(self.app.client.file_path)
+                self.prev_image = self.app.client.file_path
+            except Exception as e:
+                print(f"Error: {e}")
+                self.app.client.file_path = self.prev_image
+                messagebox.showwarning("Error reading file", "The sender sent an invalid file.")
+                return
+
             label_width = self.app.image_label.winfo_width()
             label_height = 223
 
-            self.prev_image_path = self.app.client.image_path
-
-            # Calculate the aspect ratio
             img_ratio = img.width / img.height
             label_ratio = label_width / label_height
 
             if img_ratio > label_ratio:
-                # Image is wider than the label
                 new_width = label_width
                 new_height = int(label_width / img_ratio)
             else:
-                # Image is taller than the label
                 new_height = label_height
                 new_width = int(label_height * img_ratio)
 
@@ -120,18 +132,27 @@ class CatcherWindow:
                 text="",
                 width=new_width,
                 height=new_height,
-                highlightthickness=0,  # Remove border
-                relief="flat"  # Remove border style
+                highlightthickness=0,
+                relief="flat"
             )
             self.app.image_label.image = img
-        except:
-            self.app.client.image_path = self.prev_image_path
-            messagebox.showwarning("Error reading file", "The sender sent an invalid file.")
+        else:
+            doc_img = ImageTk.PhotoImage(file="./drawables/ic_document_selected.png")
+            self.app.image_label.config(
+                image=doc_img,
+                text="",
+                width=doc_img.width(),
+                height=doc_img.height(),
+                highlightthickness=0,
+                relief="flat"
+            )
+            self.app.image_label.image = doc_img
+            self.image_name_label.config(text = os.path.basename(self.app.client.file_path), font=(self.app.font, 14))
 
     def set_desktop_background(self) -> None:
-        if self.app.client.image_path:
+        if self.app.client.file_path and self.is_image_file(self.app.client.file_path):
             try:
-                img = Image.open(self.app.client.image_path)
+                img = Image.open(self.app.client.file_path)
 
                 # Create a temporary file
                 with tempfile.NamedTemporaryFile(delete=False, suffix='.bmp') as tmpfile:
@@ -145,10 +166,10 @@ class CatcherWindow:
             except Exception as e:
                 messagebox.showwarning("Error", f"Failed to set desktop background: {e}")
         else:
-            messagebox.showwarning("Error", "No images have been received yet.")
+            messagebox.showwarning("Error", "No images.")
 
     def open_file_location(self) -> None:
-        if self.app.client.image_path:
+        if self.app.client.file_path:
             os.startfile(os.path.realpath(os.curdir) + "\\received_images")
         else:
-            messagebox.showwarning("Error", "No images have been received yet.")
+            messagebox.showwarning("Error", "No files have been received yet.")

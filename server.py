@@ -1,9 +1,10 @@
 import socket
 import threading
 import time
+import os
 
 class Server:
-    def __init__(self, file_name: str, port: int, server_name: str):
+    def __init__(self, port: int, server_name: str):
         print("START SERVER")
 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -11,16 +12,22 @@ class Server:
         self.server.listen()
         self.server_name = server_name
 
-        self.file_name = file_name
+        self.file_path = None
 
     def run(self, client_socket: socket.socket) -> None:
         while self.server.fileno() != -1:
             try:
-                if not self.file_name: continue
-                with open(self.file_name, mode="rb") as file:
+                if not self.file_path: continue
+                
+                file_path, file_extension = os.path.splitext(self.file_path)
+                client_socket.sendall(f"{file_path.split("/")[-1]}\n{file_extension}\n".encode())
+
+                with open(self.file_path, mode="rb") as file:
                     client_socket.sendall(file.read())
-                    self.file_name = None
-            except:  # When the client disconnects, the server closes the stream
+
+                self.file_path = None
+            except Exception as e:  # When the client disconnects, the server closes the stream
+                print(e)
                 break
 
     def accept_clients(self) -> None:

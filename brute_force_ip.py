@@ -65,14 +65,17 @@ class BruteForceIp:
 
     def connect(self, ip_address: str, port: int) -> None:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(0.2)
             result = sock.connect_ex((ip_address, port))
+
             with self.threader.print_lock:
                 if result != 0: return
                                  
                 try:
                     sock.send(b"ITSEARCH")
                     self.ip_adresses[ip_address] = sock.recv(16).decode()
-                except:
+                except Exception as e:
+                    print(e)
                     self.ip_adresses[ip_address] = ip_address
     
                 if self.verbose:
