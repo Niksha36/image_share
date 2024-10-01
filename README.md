@@ -33,7 +33,7 @@ This project is a minimalistic desktop application designed to send and receive 
 
 **Catcher mode**
 </p>
-        <img src="https://github.com/user-attachments/assets/3f855f00-9c27-401a-b1a4-b8e0b49171b" alt="5" style="width: 50%; height: auto;"/>
+        <img src="https://github.com/user-attachments/assets/a7a20960-4a5a-46e3-8cd5-08e34a9d235c" alt="5" style="width: 50%; height: auto;"/>
         <img src="https://github.com/user-attachments/assets/44657081-2c85-4b68-981b-65d314469be4" alt="6" style="width: 50%; height: auto;"/>
         <img src="https://github.com/user-attachments/assets/8d30e10c-058b-4ae2-aacb-bcae8bcc1a74" alt="7" style="width: 50%; height: auto;"/>
         <img src="https://github.com/user-attachments/assets/57bc19f3-311e-471d-9245-ea1d541ef6cf" alt="8" style="width: 50%; height: auto;"/>
