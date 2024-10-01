@@ -98,18 +98,19 @@ class ServerSelectionWindow:
     def get_servers(self) -> None:        
         while self.is_search :
             self.searcher.search(self.client_ip, self.app.port)
-            new_ips = self.searcher.all_ip
+            new_ips = self.searcher.ip_adresses
+            print(new_ips)
 
             if new_ips and new_ips != self.previous_ips:
                 self.previous_ips = new_ips
                 self.canvas.delete("all")  # Clear the canvas before adding new items
-                for index, server_name in enumerate(self.previous_ips):
+                for index, server_ip in enumerate(self.previous_ips):
                     self.canvas.create_image(10, 30 * index + 20, anchor="w", image=self.wifi_icon_image,
                                              tags=f"icon_{index}")
-                    self.canvas.create_text(50, 30 * index + 20, anchor="w", text=server_name, font=("Arial", 16),
+                    self.canvas.create_text(50, 30 * index + 20, anchor="w", text=self.previous_ips[server_ip], font=("Arial", 16),
                                             tags=f"text_{index}")
                     self.canvas.tag_bind(f"text_{index}", "<Button-1>",
-                                         lambda e, i=index: self.select_server(i, server_name))
+                                         lambda e, i=index: self.select_server(i, server_ip))
             time.sleep(1)
 
     def on_submit(self) -> None:

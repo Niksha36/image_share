@@ -3,6 +3,7 @@ from threading import Thread, Lock
 from time import perf_counter
 
 import socket
+import select
 import psutil
 import ipaddress
 
@@ -46,11 +47,12 @@ class Threads:
 
 class BruteForceIp:
     def __init__(self, verbose=False):
-        self.all_ip = None
+        self.ip_adresses = None
         self.verbose = verbose
 
     def search(self, client_ip: str, port: int) -> None:
-        self.all_ip = set()
+        self.ip_adresses = {}
+
         self.start = perf_counter()
         socket.setdefaulttimeout(0.1)
 
@@ -64,12 +66,17 @@ class BruteForceIp:
     def connect(self, ip_address: str, port: int) -> None:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             result = sock.connect_ex((ip_address, port))
-        with self.threader.print_lock:
-            if result != 0: return
-            
-            self.all_ip.add(ip_address)
-            if self.verbose:
-                stderr.write(f"[{perf_counter() - self.start:.5f}] Found {ip_address}\n")
+            with self.threader.print_lock:
+                if result != 0: return
+                                 
+                try:
+                    sock.send(b"ITSEARCH")
+                    self.ip_adresses[ip_address] = sock.recv(16).decode()
+                except:
+                    self.ip_adresses[ip_address] = ip_address
+    
+                if self.verbose:
+                    stderr.write(f"[{perf_counter() - self.start:.5f}] Found {ip_address}\n")
 
     def get_mask(self, client_ip: str) -> list[str]:
         try:
@@ -90,4 +97,4 @@ if __name__ == "__main__":
     client_ip = socket.gethostbyname(socket.gethostname())
     print("IP ADRESS:", client_ip)
     searcher.search(client_ip, 5050)
-    print(searcher.all_ip)
+    print(searcher.ip_adresses)
