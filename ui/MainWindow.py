@@ -15,7 +15,7 @@ class MainWindow:
         tk.Label(self.root, text="Choose Mode", font=("Arial", 20)).pack(pady=20)
 
         rounded_sender_button_image = create_rounded_rectangle_image(150, 50, 20, "#1a80e5", "Sender", "#FFFFFF", self.app.font)
-        sender_button = tk.Button(self.root, image=rounded_sender_button_image, command=self.app.create_sender_window, bd=0)
+        sender_button = tk.Button(self.root, image=rounded_sender_button_image, command=self.app.create_user_selection_window, bd=0)
         sender_button.image = rounded_sender_button_image
         sender_button.pack(pady=10)
         

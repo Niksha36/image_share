@@ -9,7 +9,7 @@ from ui.utils.rounded_button import create_rounded_rectangle_image
 
 
 class SenderWindow:
-    def __init__(self, root: tk.Tk, app):
+    def __init__(self, root: tk.Tk, app, username: str):
         self.root = root
         self.app = app
         

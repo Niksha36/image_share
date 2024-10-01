@@ -8,6 +8,7 @@ import pystray
 from PIL import Image, ImageTk, ImageFont
 
 from ui.CatcherWindow import CatcherWindow
+from ui.EnterUserNameWindow import EnterUserNameWindow
 from ui.MainWindow import MainWindow
 from ui.SenderWindow import SenderWindow
 from ui.ServerSelectionWindow import ServerSelectionWindow
@@ -82,6 +83,10 @@ class ImageShareApp:
     # Логика окна выбора сервера
     def create_server_selection_window(self) -> None:
         ServerSelectionWindow(self.root, self)
+
+    # Логика окна выбора имени пользователя
+    def create_user_selection_window(self) -> None:
+        EnterUserNameWindow(self.root, self)
 
     # функция отчищающая окно
     def clear_window(self) -> None:
