@@ -17,7 +17,7 @@ class CatcherWindow:
     def __init__(self, root: tk.Tk, app, server_ip: str):
         self.root = root
         self.app = app
-        self.root.geometry("500x450")
+        self.root.geometry("500x505")
         self.server_ip = server_ip
         threading.Thread(target=self.receive_file, daemon=True).start()
         
@@ -37,8 +37,10 @@ class CatcherWindow:
             text="The image sent by the sender will be here",
             font=("Arial", 12),
         )
-        self.app.image_label.pack(padx=40, pady=(0, 5), fill=tk.BOTH, expand=True)
-
+        self.app.image_label.pack(padx=20, pady=(0, 5), fill=tk.BOTH, expand=True)
+        #file path TextView
+        self.image_name_label = tk.Label(self.root, text="")
+        self.image_name_label.pack(pady=(0, 15))
         # set_image_as_background_button button
         rounded_set_as_background_button_image = create_rounded_rectangle_image(
             300, 50, 20, "#1a80e5", "Set image as desktop background", "#FFFFFF", self.app.font
@@ -99,6 +101,7 @@ class CatcherWindow:
     def display_image(self) -> None:
         try:
             if self.is_image_file(self.app.client.file_path):
+                self.image_name_label.config(text="", font=(self.app.font, 14))
                 img = Image.open(self.app.client.file_path)
                 label_width = self.app.image_label.winfo_width()
                 label_height = 223
@@ -135,9 +138,7 @@ class CatcherWindow:
                     relief="flat"
                 )
                 self.app.image_label.image = doc_img
-                file_name_label = tk.Label(self.root, text=os.path.basename(self.app.client.file_path),
-                                           font=(self.app.font, 12))
-                file_name_label.pack()
+                self.image_name_label.config(text = os.path.basename(self.app.client.file_path), font=(self.app.font, 14))
         except Exception as e:
             print(f"Error: {e}")
             messagebox.showwarning("Error reading file", "The sender sent an invalid file.")
