@@ -42,6 +42,7 @@ class ImageShareApp:
 
         self.client = None
         self.server = None
+        self.server_name = None
 
         self.create_main_window()
 

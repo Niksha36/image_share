@@ -99,7 +99,6 @@ class ServerSelectionWindow:
         while self.is_search :
             self.searcher.search(self.client_ip, self.app.port)
             new_ips = self.searcher.ip_adresses
-            print(new_ips)
 
             if new_ips and new_ips != self.previous_ips:
                 self.previous_ips = new_ips

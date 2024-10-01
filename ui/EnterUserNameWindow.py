@@ -55,12 +55,14 @@ class EnterUserNameWindow:
             username = ""
 
         if self.is_user_name_correct(self.username):
-            #TODO Передаю имя в сендер, осталось расписать логику передачи имени от сендера к bruteforce ip
-            self.app.create_sender_window(self.username)
+            self.app.server_name = self.username
+            self.app.create_sender_window()
         else:
             messagebox.showwarning("Incorrect username", "Username length should be greater than 3 and contain only letters.")
 
     def is_user_name_correct(self, userName):
         if len(userName) >= 3 and userName.isalpha():
+            if userName.lower() in ["mesenev", "месенев", "месенёв"]:
+                messagebox.showwarning("Это же.....", "Добро пожаловать, Великий и Могучий Месенёв!!!!")
             return True
         return False

@@ -9,11 +9,11 @@ from ui.utils.rounded_button import create_rounded_rectangle_image
 
 
 class SenderWindow:
-    def __init__(self, root: tk.Tk, app, username: str):
+    def __init__(self, root: tk.Tk, app):
         self.root = root
         self.app = app
         
-        self.app.server = Server(self.app.image_path, self.app.port)
+        self.app.server = Server(self.app.image_path, self.app.port, self.app.server_name)
         threading.Thread(target=self.app.server.accept_clients, daemon=True).start()
 
         self.create_sender_window()

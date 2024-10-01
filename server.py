@@ -3,7 +3,7 @@ import threading
 import time
 
 class Server:
-    def __init__(self, file_name: str, port: int, server_name: str = "User"):
+    def __init__(self, file_name: str, port: int, server_name: str):
         print("START SERVER")
 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
