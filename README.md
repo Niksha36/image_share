@@ -20,17 +20,17 @@ This project is a minimalistic desktop application designed to send and receive 
 
 ## User interface
 # Main window
-<img src="https://github.com/user-attachments/assets/bbc6093b-bac3-4656-a888-9bef4c9d11f9" alt="Screenshot_2024-07-31-22-29-33-694_com example dailynews" style="width: 50%; height: auto;"/>
+<img src="https://github.com/user-attachments/assets/bbc6093b-bac3-4656-a888-9bef4c9d11f9" alt="1" style="width: 50%; height: auto;"/>
 # Sender mode
-<img src="https://github.com/user-attachments/assets/89c41cee-f3a0-406e-88ad-3ed287f501c5" alt="Screenshot_2024-07-31-22-29-33-694_com example dailynews" style="width: 50%; height: auto;"/>
-<img src="https://github.com/user-attachments/assets/e51e89a5-4368-4f2f-80f7-b46aedc92c61" alt="Screenshot_2024-07-31-22-29-33-694_com example dailynews" style="width: 50%; height: auto;"/>
-<img src="https://github.com/user-attachments/assets/24bb0a0e-fa4d-46d7-aae5-5231bdb2b40c" alt="Screenshot_2024-07-31-22-29-33-694_com example dailynews" style="width: 50%; height: auto;"/>
+<img src="https://github.com/user-attachments/assets/89c41cee-f3a0-406e-88ad-3ed287f501c5" alt="2" style="width: 50%; height: auto;"/>
+<img src="https://github.com/user-attachments/assets/e51e89a5-4368-4f2f-80f7-b46aedc92c61" alt="3" style="width: 50%; height: auto;"/>
+<img src="https://github.com/user-attachments/assets/24bb0a0e-fa4d-46d7-aae5-5231bdb2b40c" alt="4" style="width: 50%; height: auto;"/>
 
 # Catcher mode
-<img src="https://github.com/user-attachments/assets/3f855f00-9c27-401a-b1a4-b8e0b49171b" alt="Screenshot_2024-07-31-22-29-33-694_com example dailynews" style="width: 50%; height: auto;"/>
-<img src="https://github.com/user-attachments/assets/44657081-2c85-4b68-981b-65d314469be4" alt="Screenshot_2024-07-31-22-29-33-694_com example dailynews" style="width: 50%; height: auto;"/>
-<img src="https://github.com/user-attachments/assets/8d30e10c-058b-4ae2-aacb-bcae8bcc1a74" alt="Screenshot_2024-07-31-22-29-33-694_com example dailynews" style="width: 50%; height: auto;"/>
-<img src="https://github.com/user-attachments/assets/57bc19f3-311e-471d-9245-ea1d541ef6cf" alt="Screenshot_2024-07-31-22-29-33-694_com example dailynews" style="width: 50%; height: auto;"/>
+<img src="https://github.com/user-attachments/assets/3f855f00-9c27-401a-b1a4-b8e0b49171b" alt="5" style="width: 50%; height: auto;"/>
+<img src="https://github.com/user-attachments/assets/44657081-2c85-4b68-981b-65d314469be4" alt="6" style="width: 50%; height: auto;"/>
+<img src="https://github.com/user-attachments/assets/8d30e10c-058b-4ae2-aacb-bcae8bcc1a74" alt="7" style="width: 50%; height: auto;"/>
+<img src="https://github.com/user-attachments/assets/57bc19f3-311e-471d-9245-ea1d541ef6cf" alt="8" style="width: 50%; height: auto;"/>
 
 
 ## Installation Guide
