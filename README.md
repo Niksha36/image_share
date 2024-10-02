@@ -1,4 +1,7 @@
 # Image Share
+
+This project is a minimalistic desktop application designed to send and receive images via two modes: Sender and Catcher
+=======
 This project is a minimalistic desktop application designed to send and receive images & files via two modes: Sender and Catcher. You can open and check image or file by clicking on file icon and check it before sending it. In catcher mode you can see received image and you have opitons set this image as desctop background or go to the file in windows explorer. We have tryed to prevent any unexpected behavior like you can not set file as desctop background or send nothing. Each and every step was thought out and user will be notified about errors and problems.
 
 # Features that were applyed in this project
@@ -70,4 +73,7 @@ To build the project yourself:
 
 [Ganzha Eduard](https://github.com/deep-learning-engineer) Б9123-01.03.02сп\
 [Shurlo Nikita](https://github.com/Niksha36) Б9123-01.03.02сп 
+
+=======
+
 
