@@ -1,5 +1,6 @@
 import socket
 import threading
+import time
 import tkinter as tk
 from tkinter import ttk, messagebox
 
@@ -109,7 +110,7 @@ class ServerSelectionWindow:
                                             tags=f"text_{index}")
                     self.canvas.tag_bind(f"text_{index}", "<Button-1>",
                                          lambda e, i=index: self.select_server(i, server_ip))
-
+            time.sleep(1)
     def on_submit(self) -> None:
         if self.connect_server:
             print(f"Selected server: {self.connect_server}")
