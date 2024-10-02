@@ -100,7 +100,7 @@ class ServerSelectionWindow:
             self.searcher.search(self.client_ip, self.app.port)
             new_ips = self.searcher.ip_adresses
 
-            if new_ips and new_ips != self.previous_ips:
+            if new_ips != self.previous_ips:
                 self.previous_ips = new_ips
                 self.canvas.delete("all")  # Clear the canvas before adding new items
                 for index, server_ip in enumerate(self.previous_ips):
@@ -111,6 +111,7 @@ class ServerSelectionWindow:
                     self.canvas.tag_bind(f"text_{index}", "<Button-1>",
                                          lambda e, i=index: self.select_server(i, server_ip))
             time.sleep(1)
+    
     def on_submit(self) -> None:
         if self.connect_server:
             print(f"Selected server: {self.connect_server}")
