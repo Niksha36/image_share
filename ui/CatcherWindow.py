@@ -17,7 +17,7 @@ class CatcherWindow:
     def __init__(self, root: tk.Tk, app, server_ip: str):
         self.root = root
         self.app = app
-        self.root.geometry("500x450")
+        self.root.geometry("500x505")
         self.server_ip = server_ip
         threading.Thread(target=self.receive_file, daemon=True).start()
 

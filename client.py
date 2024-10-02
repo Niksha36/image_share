@@ -15,7 +15,7 @@ class Client:
     def run(self) -> None:
         ready = select.select([self.client], [], [], 1)
         if ready[0] and self.client.fileno() != -1: 
-            file_name = self.client.recv(1024).decode().strip().split('\n')
+            file_name = self.client.recv(64).decode().strip().split('\n')
             if len(file_name) < 2: raise Exception("Invalid file name or extension received")
             
             file_name, file_extension = file_name

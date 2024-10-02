@@ -21,7 +21,8 @@ class Server:
                 
                 file_path, file_extension = os.path.splitext(self.file_path)
                 client_socket.sendall(f"{file_path.split("/")[-1]}\n{file_extension}\n".encode())
-
+                time.sleep(0.5)
+                print(file_path, file_extension)
                 with open(self.file_path, mode="rb") as file:
                     client_socket.sendall(file.read())
 
