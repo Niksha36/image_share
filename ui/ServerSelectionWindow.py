@@ -24,8 +24,8 @@ class ServerSelectionWindow:
         self.server_name = None
         self.is_search = True
 
-        self.check_mark_image = ImageTk.PhotoImage(Image.open(r".\drawables\ic_check_mark.png"))
-        self.wifi_icon_image = ImageTk.PhotoImage(Image.open(r".\drawables\ic_wifi.png").resize((30, 30)))
+        self.check_mark_image = ImageTk.PhotoImage(Image.open(self.app.resource_path("ic_check_mark.png", "drawables")))
+        self.wifi_icon_image = ImageTk.PhotoImage(Image.open(self.app.resource_path("ic_wifi.png", "drawables")).resize((30, 30)))
         self.create_ui()
 
     def create_ui(self) -> None:

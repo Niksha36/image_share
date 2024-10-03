@@ -137,7 +137,7 @@ class CatcherWindow:
             )
             self.app.image_label.image = img
         else:
-            doc_img = ImageTk.PhotoImage(file="./drawables/ic_document_selected.png")
+            doc_img = ImageTk.PhotoImage(file=self.app.resource_path("ic_document_selected.png", "drawables"))
             self.app.image_label.config(
                 image=doc_img,
                 text="",

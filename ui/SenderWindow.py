@@ -16,12 +16,14 @@ class SenderWindow:
         self.app.server = Server(self.app.port, self.app.server_name)
         threading.Thread(target=self.app.server.accept_clients, daemon=True).start()
 
+        self.image_extensions = ['.png', '.jpg', '.jpeg', '.bmp', '.gif']
+
         self.create_sender_window()
 
     def create_sender_window(self) -> None:
         self.app.clear_window()
         tk.Label(self.root, text="Sender Mode", font=("Arial", 20)).pack(pady=7)
-        no_image_selected = tk.PhotoImage(file="./drawables/ic_no_image_selected.png")
+        no_image_selected = tk.PhotoImage(file=self.app.resource_path("ic_no_image_selected.png", "drawables"))
 
         self.image_condition_label = tk.Label(self.root, image=no_image_selected)
         self.image_condition_label.image = no_image_selected
@@ -48,9 +50,12 @@ class SenderWindow:
         
         self.app.file_path = file_path
         file_extension = os.path.splitext(self.app.file_path)[1].lower()
-        image_extensions = ['.png', '.jpg', '.jpeg', '.bmp', '.gif']
+        
+        if file_extension in self.image_extensions:
+            image_selected = tk.PhotoImage(file=self.app.resource_path("ic_image_selected.png", "drawables"))
+        else:
+             tk.PhotoImage(file=self.app.resource_path("ic_document_selected.png", "drawables"))
 
-        image_selected = tk.PhotoImage(file="./drawables/ic_image_selected.png") if file_extension in image_extensions else tk.PhotoImage(file="./drawables/ic_document_selected.png")
         self.image_condition_label.config(image=image_selected)
         self.image_condition_label.image = image_selected
         messagebox.showinfo("Selected File", f"Selected: {os.path.basename(self.app.file_path)}")

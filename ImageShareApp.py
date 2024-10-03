@@ -20,18 +20,18 @@ class ImageShareApp:
         self.root.geometry("450x350")
 
         # Load and set the icon
-        icon_path = os.path.join(os.path.dirname(__file__), "drawables", "app_icon.png")
+        icon_path = self.resource_path("app_icon.png", "drawables")
         icon_image = ImageTk.PhotoImage(file=icon_path)
         self.root.iconphoto(False, icon_image)
         # Set the taskbar icon
         self.set_taskbar_icon(icon_path)
 
         self.window_stack = []
-        self.font_path = self.resource_path('fonts/Roboto-Regular.ttf')
+        self.font_path = self.resource_path("Roboto-Regular.ttf", "fonts")
         self.font = ImageFont.truetype(self.font_path, 16)
 
         # Load the back arrow icon
-        back_icon_path = os.path.join(os.path.dirname(__file__), "drawables", "icon_back.png")
+        back_icon_path = self.resource_path("icon_back.png", "drawables")
         self.back_icon_image = ImageTk.PhotoImage(file=back_icon_path)
         
         self.port = port
@@ -44,13 +44,13 @@ class ImageShareApp:
 
         self.create_main_window()
 
-    def resource_path(self, relative_path: str) -> None:
+    def resource_path(self, relative_path: str, folder: str = None) -> None:
         try:
             # PyInstaller creates a temp folder and stores path in _MEIPASS
             base_path = sys._MEIPASS
         except AttributeError:
-            base_path = os.path.abspath(".")
-
+            base_path = os.path.join(os.path.abspath("."), folder) if folder else os.path.abspath(".")
+        
         return os.path.join(base_path, relative_path)
 
     def set_taskbar_icon(self, icon_path) -> None:
