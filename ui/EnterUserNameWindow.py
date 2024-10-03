@@ -36,6 +36,7 @@ class EnterUserNameWindow:
                                   bd=0)
         submit_button.image = rounded_submit_button_image
         submit_button.pack(pady=10)
+        
         back_button = tk.Button(self.root, image=self.app.back_icon_image, command=self.app.go_back, bd=0)
         back_button.place(x=10, y=10)
 

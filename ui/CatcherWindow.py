@@ -20,6 +20,7 @@ class CatcherWindow:
         self.root.geometry("500x505")
         self.server_ip = server_ip
         threading.Thread(target=self.receive_file, daemon=True).start()
+        
         self.prev_image = None
 
         self.active_rounded_set_as_background_button_image = create_rounded_rectangle_image(
@@ -61,14 +62,12 @@ class CatcherWindow:
         self.set_image_as_background_button = tk.Button(
             self.root, image=self.inactive_rounded_set_as_background_button_image, command=self.set_desktop_background, bd=0
         )
-        self.set_image_as_background_button.image = self.inactive_rounded_set_as_background_button_image
         self.set_image_as_background_button.pack(pady=(5,15))
 
         #open file location button
         self.open_file_location_button = tk.Button(
             self.root, image=self.inactive_rounded_open_file_location_button, command=self.open_file_location, bd=0
         )
-        self.open_file_location_button.image = self.inactive_rounded_open_file_location_button
         self.open_file_location_button.pack(pady=(0,20))
 
         #back button
@@ -148,6 +147,7 @@ class CatcherWindow:
             self.make_active_set_desktop_background_button()
 
         else:
+            self.make_inactive_set_desktop_background_button()
             doc_img = ImageTk.PhotoImage(file=self.app.resource_path("ic_document_selected.png", "drawables"))
             self.app.image_label.config(
                 image=doc_img,
@@ -188,17 +188,13 @@ class CatcherWindow:
     # changing color of Open file location button to active
     def make_active_open_file_location_button(self):
         self.open_file_location_button.config(image=self.active_rounded_open_file_location_button)
-        self.open_file_location_button.image = self.active_rounded_open_file_location_button
 
     def make_active_set_desktop_background_button(self):
         self.set_image_as_background_button.config(image=self.active_rounded_set_as_background_button_image)
-        self.set_image_as_background_button.image = self.active_rounded_set_as_background_button_image
 
     # changing color of Set image as desktop background button to active
     def make_inactive_set_desktop_background_button(self):
         self.set_image_as_background_button.config(image=self.inactive_rounded_set_as_background_button_image)
-        self.set_image_as_background_button.image = self.inactive_rounded_set_as_background_button_image
 
     def make_inactive_open_file_location_button(self):
         self.open_file_location_button.config(image=self.inactive_rounded_open_file_location_button)
-        self.open_file_location_button.image = self.inactive_rounded_open_file_location_button
