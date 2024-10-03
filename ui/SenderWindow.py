@@ -36,10 +36,10 @@ class SenderWindow:
         select_file_button.image = rounded_select_file_button_image
         select_file_button.pack(pady=5)
 
-        rounded_send_button_image = create_rounded_rectangle_image(150, 50, 20, "#1a80e5", "Send", "#FFFFFF", self.app.font)
-        send_button = tk.Button(self.root, image=rounded_send_button_image, command=self.send_file, bd=0)
-        send_button.image = rounded_send_button_image
-        send_button.pack(pady=10)
+        rounded_inactive_send_button_image = create_rounded_rectangle_image(150, 50, 20, "#CFCFCF", "Send", "#737373", self.app.font)
+        self.send_button = tk.Button(self.root, image=rounded_inactive_send_button_image, command=self.send_file, bd=0)
+        self.send_button.image = rounded_inactive_send_button_image
+        self.send_button.pack(pady=10)
 
         back_button = tk.Button(self.root, image=self.app.back_icon_image, command=self.app.go_back, bd=0)
         back_button.place(x=10, y=10)
@@ -58,8 +58,13 @@ class SenderWindow:
 
         self.image_condition_label.config(image=image_selected)
         self.image_condition_label.image = image_selected
-        messagebox.showinfo("Selected File", f"Selected: {os.path.basename(self.app.file_path)}")
 
+        # Changing send button color to active
+        rounded_active_send_button_image = create_rounded_rectangle_image(150, 50, 20, "#1a80e5", "Send", "#FFFFFF", self.app.font)
+        self.send_button.config(image=rounded_active_send_button_image)
+        self.send_button.image = rounded_active_send_button_image
+
+        messagebox.showinfo("Selected File", f"Selected: {os.path.basename(self.app.file_path)}")
         image_name = os.path.basename(self.app.file_path)
         self.image_name_label.config(text = image_name, font=(self.app.font, 12))
         self.image_condition_label.config(image=image_selected)
@@ -79,4 +84,4 @@ class SenderWindow:
             return
         
         self.app.server.file_path = self.app.file_path
-        messagebox.showinfo("Success", "Image was successfully sent")
+        messagebox.showinfo("Success", "File was successfully sent")

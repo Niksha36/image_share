@@ -99,6 +99,8 @@ class ImageShareApp:
         if self.client:
             self.client.close_client()
             self.client = None  # Ensure the client is set to None after closing
+        if self.file_path:
+            self.file_path = None
         self.create_main_window()
 
 

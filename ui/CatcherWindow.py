@@ -20,10 +20,24 @@ class CatcherWindow:
         self.root.geometry("500x505")
         self.server_ip = server_ip
         threading.Thread(target=self.receive_file, daemon=True).start()
-
         self.prev_image = None
-        
+
+        self.active_rounded_set_as_background_button_image = create_rounded_rectangle_image(
+            300, 50, 20, "#1a80e5", "Set image as desktop background", "#FFFFFF", self.app.font
+        )
+        self.active_rounded_open_file_location_button = create_rounded_rectangle_image(
+            300, 50, 20, "#1a80e5", "Open file location", "#FFFFFF", self.app.font
+        )
+
+        self.inactive_rounded_set_as_background_button_image = create_rounded_rectangle_image(
+            300, 50, 20, "#CFCFCF", "Set image as desktop background", "#737373", self.app.font
+        )
+        self.inactive_rounded_open_file_location_button = create_rounded_rectangle_image(
+            300, 50, 20, "#CFCFCF", "Open file location", "#737373", self.app.font
+        )
+
         self.create_catcher_window()
+
 
     def create_catcher_window(self) -> None:
         self.app.clear_window()
@@ -44,24 +58,18 @@ class CatcherWindow:
         self.image_name_label = tk.Label(self.root, text="")
         self.image_name_label.pack(pady=(0, 15))
         # set_image_as_background_button button
-        rounded_set_as_background_button_image = create_rounded_rectangle_image(
-            300, 50, 20, "#1a80e5", "Set image as desktop background", "#FFFFFF", self.app.font
+        self.set_image_as_background_button = tk.Button(
+            self.root, image=self.inactive_rounded_set_as_background_button_image, command=self.set_desktop_background, bd=0
         )
-        set_image_as_background_button = tk.Button(
-            self.root, image=rounded_set_as_background_button_image, command=self.set_desktop_background, bd=0
-        )
-        set_image_as_background_button.image = rounded_set_as_background_button_image
-        set_image_as_background_button.pack(pady=(5,15))
+        self.set_image_as_background_button.image = self.inactive_rounded_set_as_background_button_image
+        self.set_image_as_background_button.pack(pady=(5,15))
 
         #open file location button
-        rounded_set_as_background_button_image = create_rounded_rectangle_image(
-            300, 50, 20, "#1a80e5", "Open file location", "#FFFFFF", self.app.font
+        self.open_file_location_button = tk.Button(
+            self.root, image=self.inactive_rounded_open_file_location_button, command=self.open_file_location, bd=0
         )
-        open_file_location_button = tk.Button(
-            self.root, image=rounded_set_as_background_button_image, command=self.open_file_location, bd=0
-        )
-        open_file_location_button.image = rounded_set_as_background_button_image
-        open_file_location_button.pack(pady=(0,20))
+        self.open_file_location_button.image = self.inactive_rounded_open_file_location_button
+        self.open_file_location_button.pack(pady=(0,20))
 
         #back button
         back_button = tk.Button(self.root, image=self.app.back_icon_image, command=self.app.go_back, bd=0)
@@ -92,6 +100,7 @@ class CatcherWindow:
             if self.app.client is None: break
             if self.app.client.is_download:
                 self.display_image()
+                self.make_active_open_file_location_button()
                 self.app.client.is_download = False
     
     def is_image_file(self, file_path: str) -> bool:
@@ -102,7 +111,7 @@ class CatcherWindow:
     def display_image(self) -> None:
         if self.is_image_file(self.app.client.file_path):
             self.image_name_label.config(text="", font=(self.app.font, 14))
-            
+            self.make_active_set_desktop_background_button()
             try:
                 img = Image.open(self.app.client.file_path)
                 self.prev_image = self.app.client.file_path
@@ -136,6 +145,8 @@ class CatcherWindow:
                 relief="flat"
             )
             self.app.image_label.image = img
+            self.make_active_set_desktop_background_button()
+
         else:
             doc_img = ImageTk.PhotoImage(file=self.app.resource_path("ic_document_selected.png", "drawables"))
             self.app.image_label.config(
@@ -148,7 +159,7 @@ class CatcherWindow:
             )
             self.app.image_label.image = doc_img
             self.image_name_label.config(text = os.path.basename(self.app.client.file_path), font=(self.app.font, 14))
-
+    
     def set_desktop_background(self) -> None:
         if self.app.client.file_path and self.is_image_file(self.app.client.file_path):
             try:
@@ -166,10 +177,28 @@ class CatcherWindow:
             except Exception as e:
                 messagebox.showwarning("Error", f"Failed to set desktop background: {e}")
         else:
-            messagebox.showwarning("Error", "No images.")
+            messagebox.showwarning("Error", "No images have been received yet.")
 
     def open_file_location(self) -> None:
         if self.app.client.file_path:
             os.startfile(os.path.realpath(os.curdir) + "\\received_images")
         else:
             messagebox.showwarning("Error", "No files have been received yet.")
+
+    # changing color of Open file location button to active
+    def make_active_open_file_location_button(self):
+        self.open_file_location_button.config(image=self.active_rounded_open_file_location_button)
+        self.open_file_location_button.image = self.active_rounded_open_file_location_button
+
+    def make_active_set_desktop_background_button(self):
+        self.set_image_as_background_button.config(image=self.active_rounded_set_as_background_button_image)
+        self.set_image_as_background_button.image = self.active_rounded_set_as_background_button_image
+
+    # changing color of Set image as desktop background button to active
+    def make_inactive_set_desktop_background_button(self):
+        self.set_image_as_background_button.config(image=self.inactive_rounded_set_as_background_button_image)
+        self.set_image_as_background_button.image = self.inactive_rounded_set_as_background_button_image
+
+    def make_inactive_open_file_location_button(self):
+        self.open_file_location_button.config(image=self.inactive_rounded_open_file_location_button)
+        self.open_file_location_button.image = self.inactive_rounded_open_file_location_button
