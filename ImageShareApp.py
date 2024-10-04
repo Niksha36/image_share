@@ -106,5 +106,5 @@ class ImageShareApp:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = ImageShareApp(root, 5050)
+    app = ImageShareApp(root, 80)
     root.mainloop()

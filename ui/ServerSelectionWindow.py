@@ -20,17 +20,15 @@ class ServerSelectionWindow:
         self.client_ip = socket.gethostbyname(socket.gethostname())
 
         self.connect_server = None
-        self.previous_ips = set()
+        self.previous_ips = {}
         self.selected_item = None
         self.server_name = None
         self.is_search = True
 
         self.check_mark_image = ImageTk.PhotoImage(Image.open(self.app.resource_path("ic_check_mark.png", "drawables")))
         self.wifi_icon_image = ImageTk.PhotoImage(Image.open(self.app.resource_path("ic_wifi.png", "drawables")).resize((30, 30)))
-        self.rounded_active_submit_button_image = create_rounded_rectangle_image(150, 50, 20, "#1a80e5", "Submit",
-                                                                                 "#FFFFFF")
-        self.rounded_inactive_submit_button_image = create_rounded_rectangle_image(150, 50, 20, "#CFCFCF", "Submit",
-                                                                                 "#737373")
+        self.rounded_active_submit_button_image = create_rounded_rectangle_image(150, 50, 20, "#1a80e5", "Submit", "#FFFFFF")
+        self.rounded_inactive_submit_button_image = create_rounded_rectangle_image(150, 50, 20, "#CFCFCF", "Submit", "#737373")
         self.create_ui()
 
     def create_ui(self) -> None:
@@ -87,7 +85,7 @@ class ServerSelectionWindow:
     def on_mouse_wheel(self, event: tk.Event) -> None:
         self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
-    def select_server(self, index: int, server_name: str) -> None:
+    def select_server(self, index: int) -> None:
         if self.selected_item is not None:
             self.canvas.delete(f"check_{self.selected_item}")
             if self.selected_item == index:
@@ -98,26 +96,31 @@ class ServerSelectionWindow:
 
         self.make_submit_button_active()
         self.selected_item = index
-        self.connect_server = server_name
+        self.connect_server = list(self.previous_ips.keys())[index]
 
         x1, y1, x2, y2 = self.canvas.bbox(f"text_{index}")
         self.canvas.create_image(x2 + 20, (y1 + y2) // 2, image=self.check_mark_image, tags=f"check_{index}")
     
     def get_servers(self) -> None:        
-        while self.is_search :
+        while self.is_search :                
             self.searcher.search(self.client_ip, self.app.port)
             new_ips = self.searcher.ip_adresses
 
             if new_ips != self.previous_ips:
                 self.previous_ips = new_ips
                 self.canvas.delete("all")  # Clear the canvas before adding new items
+
+                if self.connect_server not in list(self.previous_ips.keys()):
+                    self.connect_server = None
+                    self.make_submit_button_inactive()
+
                 for index, server_ip in enumerate(self.previous_ips):
                     self.canvas.create_image(10, 30 * index + 20, anchor="w", image=self.wifi_icon_image,
                                              tags=f"icon_{index}")
                     self.canvas.create_text(50, 30 * index + 20, anchor="w", text=self.previous_ips[server_ip], font=("Arial", 16),
                                             tags=f"text_{index}")
-                    self.canvas.tag_bind(f"text_{index}", "<Button-1>",
-                                         lambda e, i=index: self.select_server(i, server_ip))
+                    self.canvas.tag_bind(f"text_{index}", f"<Button-1>",
+                                         lambda e, i = index: self.select_server(i))
             time.sleep(1)
     
     def on_submit(self) -> None:
