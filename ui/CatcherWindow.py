@@ -54,7 +54,7 @@ class CatcherWindow:
             text="The image sent by the sender will be here",
             font=("Arial", 12),
         )
-        self.app.image_label.pack(padx=40, pady=(0, 5), fill=tk.BOTH, expand=True)
+        self.app.image_label.pack(padx=20, pady=(0, 5), fill=tk.BOTH, expand=True)
         
         self.image_name_label = tk.Label(self.root, text="")
         self.image_name_label.pack(pady=(0, 15))

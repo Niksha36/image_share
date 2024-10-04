@@ -54,7 +54,7 @@ class SenderWindow:
         if file_extension in self.image_extensions:
             image_selected = tk.PhotoImage(file=self.app.resource_path("ic_image_selected.png", "drawables"))
         else:
-            image_selected = tk.PhotoImage(file=self.app.resource_path("ic_document_selected.png", "drawables"))
+            image_selected = tk.PhotoImage(file=self.app.resource_path("ic_document_selected_sender.png", "drawables"))
 
         self.image_condition_label.config(image=image_selected)
         self.image_condition_label.image = image_selected
