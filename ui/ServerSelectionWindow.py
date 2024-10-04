@@ -18,7 +18,8 @@ class ServerSelectionWindow:
 
         self.searcher = BruteForceIp()
         self.client_ip = socket.gethostbyname(socket.gethostname())
-        
+
+        self.connect_server = None
         self.previous_ips = set()
         self.selected_item = None
         self.server_name = None
@@ -26,6 +27,10 @@ class ServerSelectionWindow:
 
         self.check_mark_image = ImageTk.PhotoImage(Image.open(self.app.resource_path("ic_check_mark.png", "drawables")))
         self.wifi_icon_image = ImageTk.PhotoImage(Image.open(self.app.resource_path("ic_wifi.png", "drawables")).resize((30, 30)))
+        self.rounded_active_submit_button_image = create_rounded_rectangle_image(150, 50, 20, "#1a80e5", "Submit",
+                                                                                 "#FFFFFF")
+        self.rounded_inactive_submit_button_image = create_rounded_rectangle_image(150, 50, 20, "#CFCFCF", "Submit",
+                                                                                 "#737373")
         self.create_ui()
 
     def create_ui(self) -> None:
@@ -67,9 +72,9 @@ class ServerSelectionWindow:
 
         button_frame = ttk.Frame(main_frame)
         button_frame.pack(fill=tk.X, pady=(0, 10))
-        self.rounded_submit_button_image = create_rounded_rectangle_image(150, 50, 20, "#1a80e5", "Submit", "#FFFFFF")
-        submit_button = tk.Button(button_frame, image=self.rounded_submit_button_image, bd=0, command=self.on_submit)
-        submit_button.pack()
+
+        self.submit_button = tk.Button(button_frame, image=self.rounded_inactive_submit_button_image, bd=0, command=self.on_submit)
+        self.submit_button.pack()
 
         back_button = tk.Button(self.root, image=self.app.back_icon_image, command=self.go_back, bd=0)
         back_button.place(x=3, y=0)
@@ -88,10 +93,13 @@ class ServerSelectionWindow:
             if self.selected_item == index:
                 self.selected_item = None
                 self.connect_server = None
+                self.make_submit_button_inactive()
                 return
 
+        self.make_submit_button_active()
         self.selected_item = index
         self.connect_server = server_name
+
         x1, y1, x2, y2 = self.canvas.bbox(f"text_{index}")
         self.canvas.create_image(x2 + 20, (y1 + y2) // 2, image=self.check_mark_image, tags=f"check_{index}")
     
@@ -123,3 +131,9 @@ class ServerSelectionWindow:
     def go_back(self) -> None:
         self.is_search  = False
         self.app.go_back()
+
+    def make_submit_button_active(self):
+        self.submit_button.config(image=self.rounded_active_submit_button_image)
+
+    def make_submit_button_inactive(self):
+        self.submit_button.config(image=self.rounded_inactive_submit_button_image)
