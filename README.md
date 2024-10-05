@@ -58,15 +58,7 @@ Install the files `ImageShareApp.exe` on both devices and run them
 
 To build the project yourself:
 1. install the .exe file library `pyinstaller`
-2. use the command: `pyinstaller --onefile ImageShareApp.py`
-
-**If icons or fonts are not displayed correctly, replace the field `datas` in the relevant `.spec` file to the following lines:**
-
-`datas=[
-        ('drawables/app_icon.png', 'drawables'),
-        ('drawables/icon_back.png', 'drawables'), 
-        ('fonts/Roboto-Regular.ttf', 'fonts')
-    ],`
+2. use the command: `pyinstaller --onefile -w --add-data=".\drawables\*;." --add-data=".\fonts\*;."  ImageShareApp.py`
 
 
 ## Developers

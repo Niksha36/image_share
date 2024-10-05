@@ -1,4 +1,5 @@
 from sys import stderr
+from json import detect_encoding
 from threading import Thread, Lock
 from time import perf_counter
 
@@ -33,7 +34,10 @@ class Threads:
 
     def join(self) -> None:
         for thread in self.threads:
-            thread.join()
+            try:
+                thread.join()
+            except:
+                continue
 
     def worker(self, thread: Thread) -> None:
         while self.running and (len(self.functions) > 0):
@@ -54,8 +58,6 @@ class BruteForceIp:
         self.ip_adresses = {}
 
         self.start = perf_counter()
-        socket.setdefaulttimeout(0.1)
-
         self.threader = Threads(30)
         for ip in self.get_mask(client_ip):
             self.threader.append(self.connect, ip, port)
@@ -71,11 +73,16 @@ class BruteForceIp:
             with self.threader.print_lock:
                 if result != 0: return
                                  
+                sock.send(b"ITSEARCH")
+                
                 try:
-                    sock.send(b"ITSEARCH")
-                    self.ip_adresses[ip_address] = sock.recv(16).decode()
+                    ready = select.select([sock], [], [], 0.4)
+                    if not ready[0]:
+                        raise Exception("The server does not say its name.")
+                    
+                    self.ip_adresses[ip_address] =  sock.recv(32).decode()
                 except Exception as e:
-                    print(e)
+                    # print(e)
                     self.ip_adresses[ip_address] = ip_address
     
                 if self.verbose:
@@ -99,5 +106,5 @@ if __name__ == "__main__":
 
     client_ip = socket.gethostbyname(socket.gethostname())
     print("IP ADRESS:", client_ip)
-    searcher.search(client_ip, 5050)
+    searcher.search(client_ip, 80)
     print(searcher.ip_adresses)
