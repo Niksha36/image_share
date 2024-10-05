@@ -181,10 +181,10 @@ class CatcherWindow:
 
     def open_file_location(self) -> None:
         if self.app.client.file_path:
-            os.startfile(os.path.realpath(os.curdir) + "\\received_images")
+            file_path = os.path.realpath(self.app.client.file_path)
+            subprocess.run(['explorer', '/select,', file_path])
         else:
             messagebox.showwarning("Error", "No files have been received yet.")
-
     # changing color of Open file location button to active
     def make_active_open_file_location_button(self):
         self.open_file_location_button.config(image=self.active_rounded_open_file_location_button)
